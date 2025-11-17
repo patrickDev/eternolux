@@ -1,0 +1,52 @@
+[
+  {
+    "productId": "a3c1b2f4-9d8e-4a98-bd3e-9a5e6b8c1d32",
+    "name": "Wireless Mouse",
+    "description": "Ergonomic wireless mouse with USB receiver",
+    "price": 25.99,
+    "stock": 150,
+    "imageUrl": "/",
+    "rating": 4.5,
+    "createdAt": "2025-10-14T12:00:00.000Z"
+  },
+  {
+    "productId": "b7f9c201-8a44-4e3f-bf1e-3cde77f6e654",
+    "name": "Mechanical Keyboard",
+    "description": "RGB mechanical keyboard with blue switches",
+    "price": 89.99,
+    "stock": 80,
+    "imageUrl": "/",
+    "rating": 4.7,
+    "createdAt": "2025-10-14T12:00:00.000Z"
+  },
+  {
+    "productId": "c24b8123-4f2e-4c33-9e2a-88b4b11c7a9f",
+    "name": "Gaming Headset",
+    "description": "Surround sound gaming headset with noise-cancelling mic",
+    "price": 59.99,
+    "stock": 120,
+    "imageUrl": "/",
+    "rating": 4.6,
+    "createdAt": "2025-10-14T12:00:00.000Z"
+  },
+  {
+    "productId": "d42e93ab-1a2f-4d76-9b3e-9a5e6b8c1a99",
+    "name": "4K Monitor",
+    "description": "27-inch 4K UHD display with ultra-thin bezel",
+    "price": 329.99,
+    "stock": 60,
+    "imageUrl": "/",
+    "rating": 4.8,
+    "createdAt": "2025-10-14T12:00:00.000Z"
+  },
+  {
+    "productId": "e89f3b7a-5d8e-4f2a-8b6e-7a5e6b8c1b22",
+    "name": "",
+    "description": "Multiport USB-C hub with HDMI, USB-A, and SD card support",
+    "price": 39.99,
+    "stock": 200,
+    "imageUrl": "/",
+    "rating": 4.4,
+    "createdAt": "2025-10-14T12:00:00.000Z"
+  }
+]

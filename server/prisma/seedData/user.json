@@ -1,0 +1,35 @@
+[
+  {
+    "userId": "b4d1b2f4-1a2b-4c76-bd3e-9a5e6b8c1a67",
+    "firstName": "Alice",
+    "lastName": "Johnson",
+    "email": "alice.johnson@example.com",
+    "phone": "+15551234567",
+    "passwordHash": "$2b$10$k5uXh8dQX3eEJQbQvD9lOeY/0H9Tq7Wv8z5nXrH5mCq8K1qkJ5jOe",
+    "isAdmin": false,
+    "createdAt": "2025-10-14T12:00:00.000Z",
+    "cart": {
+      "create": {
+        "cartId": "cart1-uuid",
+        "createdAt": "2025-10-14T12:00:00.000Z"
+     
+      }
+    }
+  },
+  {
+    "userId": "b4d1b2f4-1a2b-4c76-bd3e-9a5e6b8c1x45",
+    "firstName": "Bob",
+    "lastName": "Williams",
+    "email": "bob.williams@example.com",
+    "phone": "+15559876543",
+    "passwordHash": "$2b$10$uZ1wq8DgT7i2Z7VgZbA9xuJ3M5mFJ2mP6nB9fOqR1aYbK7cL3qRxe",
+    "isAdmin": true,
+    "createdAt": "2025-10-14T12:00:00.000Z",
+    "cart": {
+      "create": {
+        "cartId": "cart2-uuid",
+        "createdAt": "2025-10-14T12:00:00.000Z"
+      }
+    }
+  }
+]
