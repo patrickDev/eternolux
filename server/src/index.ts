@@ -19,7 +19,7 @@ import signinRoutes from '../routes/signinRoutes';
 /** CONFIGURATION */
 dotenv.config();
 const app = express();
-const PORT = process.env.PORT || 8080;
+const PORT = Number(process.env.PORT) || 8080;
 
 app.use(express.json());
 app.use(helmet());
@@ -47,6 +47,6 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 });
 
 /** START SERVER */
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
