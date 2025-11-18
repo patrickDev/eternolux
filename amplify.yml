@@ -1,24 +1,26 @@
-# amplify.yml → place at the ROOT of your repository
+# amplify.yml → place at the root (same level as client/ and server/)
 version: 1
 
 frontend:
   phases:
     preBuild:
       commands:
+        # ────── Frontend (Next.js) ──────
         - cd client
-        # Force correct Node.js version (critical for Next.js)
-        - corepack enable || echo "corepack not needed"
-        - node -v
-        - nvm install 20 || echo "nvm not found – using system Node"
+        - nvm install 20
         - nvm use 20
-        - npm ci
+        - npm ci --include=dev
 
     build:
       commands:
-        - npm run build       # This runs `next build` (make sure your package.json has "build": "next build")
+        # Copy any needed env vars or files from server if you want
+        # (optional – only if your Next.js needs server-side secrets at build time)
+        # - cp ../server/.env.local .env.production   # example
+
+        - npm run build
 
   artifacts:
-    # Next.js output folder – this is the ONLY correct one for Amplify Gen 2 in 2025
+    # Next.js on Amplify Gen 2 in 2025 → always .next
     baseDirectory: client/.next
     files:
       - '**/*'
@@ -27,17 +29,24 @@ frontend:
     paths:
       - client/node_modules/**/*
       - client/.next/cache/**/*
-      - client/public/**/*
 
-# Backend deployment (your server folder)
+# ────── Backend (server folder with database) ──────
+# We keep it super simple: just install dependencies
+# Amplify automatically deploys everything in server/ as Lambda + API Gateway
+# if you ever run `amplify add api` or have amplify/backend/ inside server/
 backend:
   phases:
     build:
       commands:
-        - cd ../server
+        # Start from repo root (important!)
+        - cd server
         - npm ci
+        # If you use Prisma → generate the client
+        # - npx prisma generate
+        # If you need migration at build time
+        # - npx prisma migrate deploy
 
-# Branch & preview settings (you get free PR previews!)
+# Optional: nice branch previews
 branches:
   main:
     stage: production
