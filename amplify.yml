@@ -1,0 +1,45 @@
+# amplify.yml → place at the ROOT of your repository
+version: 1
+
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - cd client
+        # Force correct Node.js version (critical for Next.js)
+        - corepack enable || echo "corepack not needed"
+        - node -v
+        - nvm install 20 || echo "nvm not found – using system Node"
+        - nvm use 20
+        - npm ci
+
+    build:
+      commands:
+        - npm run build       # This runs `next build` (make sure your package.json has "build": "next build")
+
+  artifacts:
+    # Next.js output folder – this is the ONLY correct one for Amplify Gen 2 in 2025
+    baseDirectory: client/.next
+    files:
+      - '**/*'
+
+  cache:
+    paths:
+      - client/node_modules/**/*
+      - client/.next/cache/**/*
+      - client/public/**/*
+
+# Backend deployment (your server folder)
+backend:
+  phases:
+    build:
+      commands:
+        - cd ../server
+        - npm ci
+
+# Branch & preview settings (you get free PR previews!)
+branches:
+  main:
+    stage: production
+  '*':
+    stage: development
