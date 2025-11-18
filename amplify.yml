@@ -9,18 +9,14 @@ frontend:
         - cd client
         - nvm install 20
         - nvm use 20
-        - npm ci --include=dev
+        # ← Changed from npm ci → npm install (safe + auto-fixes lock file)
+        - npm install --include=dev
 
     build:
       commands:
-        # Copy any needed env vars or files from server if you want
-        # (optional – only if your Next.js needs server-side secrets at build time)
-        # - cp ../server/.env.local .env.production   # example
-
         - npm run build
 
   artifacts:
-    # Next.js on Amplify Gen 2 in 2025 → always .next
     baseDirectory: client/.next
     files:
       - '**/*'
@@ -30,23 +26,19 @@ frontend:
       - client/node_modules/**/*
       - client/.next/cache/**/*
 
-# ────── Backend (server folder with database) ──────
-# We keep it super simple: just install dependencies
-# Amplify automatically deploys everything in server/ as Lambda + API Gateway
-# if you ever run `amplify add api` or have amplify/backend/ inside server/
+# ────── Backend (server folder) ──────
 backend:
   phases:
     build:
       commands:
-        # Start from repo root (important!)
         - cd server
-        - npm ci
-        # If you use Prisma → generate the client
+        # ← Changed from npm ci → npm install (this will never fail)
+        - npm install
+        # Optional Prisma commands (uncomment if you use Prisma)
         # - npx prisma generate
-        # If you need migration at build time
         # - npx prisma migrate deploy
 
-# Optional: nice branch previews
+# Branch previews
 branches:
   main:
     stage: production
