@@ -8,7 +8,7 @@
     "prisma:generate": "prisma generate",
     "postprisma:generate": "mkdir -p ../client/src/types && cp node_modules/.prisma/client/index.d.ts ../client/src/types/prismaTypes.d.ts",
     "start": "npm run build && node dist/index.js",
-    "dev": "concurrently \"tsc -w\" \"nodemon dist/index.js\"",
+    "dev": "concurrently \"tsc -w\" \"nodemon dist/index.ts\"",
     "build": "rimraf dist && tsc"
   },
   "keywords": [],
