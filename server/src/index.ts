@@ -8,7 +8,7 @@ console.log("➡ process.env (important values):");
 console.log("   PORT =", process.env.PORT);
 console.log("   DATABASE_URL =", process.env.DATABASE_URL ? "[loaded]" : "[missing]");
 
-const PORT = Number(process.env.PORT) || 8080;
+const PORT = Number(process.env.PORT) || 80;
 
 console.log("➡ Initializing app...");
 const app = express();
