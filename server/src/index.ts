@@ -1,52 +1,23 @@
-import express, { Request, Response, NextFunction } from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
-import morgan from 'morgan';
-import bodyParser from 'body-parser';
+import express from 'express';
 import dotenv from 'dotenv';
-//import { Pool } from 'pg';
 
-//const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-
-
-
-/** ROUTE IMPORTS */
-import shopRoutes from '../routes/shopRoutes';
-import searchRoutes from '../routes/searchRoutes';
-import registerRoutes from '../routes/registerRoutes';
-import signinRoutes from '../routes/signinRoutes';
-
-/** CONFIGURATION */
+console.log("➡ Loading .env file...");
 dotenv.config();
-const app = express();
+
+console.log("➡ process.env (important values):");
+console.log("   PORT =", process.env.PORT);
+console.log("   DATABASE_URL =", process.env.DATABASE_URL ? "[loaded]" : "[missing]");
+
 const PORT = Number(process.env.PORT) || 8080;
 
-app.use(express.json());
-app.use(helmet());
-app.use(helmet.crossOriginResourcePolicy({ policy: 'cross-origin' }));
-app.use(morgan('common'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cors());
+console.log("➡ Initializing app...");
+const app = express();
 
-
-/** ROUTES */
-app.use('/shop', shopRoutes); //http://localhost:8080/shop
-app.use('/', searchRoutes); //http://localhost:8080/products
-app.use('/', registerRoutes); //http://localhost:8080/register
-app.use('/', signinRoutes); //http://localhost:8080/signin
-app.get('/', (req:  Request, res: Response) => {
-  res.send('Welcome to the E-commerce API');
-})
-
-
-/** ERROR HANDLING */
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-  console.error(err.stack);
-  res.status(500).send('Something broke!');
+app.get("/", (req, res) => {
+  res.send("API is running");
 });
 
-/** START SERVER */
+console.log("➡ Attempting to start server...");
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+  console.log(`✔ Server running at http://localhost:${PORT}`);
 });
