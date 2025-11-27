@@ -1,6 +1,6 @@
 [
   {
-    "userId": "b4d1b2f4-1a2b-4c76-bd3e-9a5e6b8c1a67",
+    "userId": "3f7a3be4-8a61-4cfb-a29f-281d0eac34b7",
     "firstName": "Alice",
     "lastName": "Johnson",
     "email": "alice.johnson@example.com",
@@ -10,14 +10,13 @@
     "createdAt": "2025-10-14T12:00:00.000Z",
     "cart": {
       "create": {
-        "cartId": "cart1-uuid",
+        "cartId": "c3f7b212-1a14-4ec4-95f3-92f7665ad4e8",
         "createdAt": "2025-10-14T12:00:00.000Z"
-     
       }
     }
   },
   {
-    "userId": "b4d1b2f4-1a2b-4c76-bd3e-9a5e6b8c1x45",
+    "userId": "9c0ca8b1-9e8b-4b7b-86b7-cbb1a84d8c11",
     "firstName": "Bob",
     "lastName": "Williams",
     "email": "bob.williams@example.com",
@@ -27,8 +26,8 @@
     "createdAt": "2025-10-14T12:00:00.000Z",
     "cart": {
       "create": {
-        "cartId": "cart2-uuid",
-        "createdAt": "2025-10-14T12:00:00.000Z"
+        "cartId": "0f29cb75-457d-4ccb-abde-2db1f62013ea",
+        "createdAt": "2025-10-10T12:00:00.000Z"
       }
     }
   }

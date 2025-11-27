@@ -10,19 +10,37 @@ const prisma = new PrismaClient();
 async function main() {
   const dataDir = path.join(__dirname, "seedData");
 
+
+  // Delete dependent tables first
+  await prisma.orderItem.deleteMany();
+  await prisma.order.deleteMany();
+  await prisma.cartItem.deleteMany();
+  await prisma.cart.deleteMany();
+  await prisma.adminAction.deleteMany();
+  await prisma.shippingAddress.deleteMany();
+  await prisma.orderSummary.deleteMany();
+  await prisma.productSummary.deleteMany();
+  await prisma.sellByCategory.deleteMany();
+  await prisma.sellSummary.deleteMany();
+  await prisma.productCategory.deleteMany();
+  await prisma.product.deleteMany();
+  await prisma.category.deleteMany();
+  await prisma.user.deleteMany(); // now safe
+
   const orderedFiles = [
     "category.json",
     "product.json",
-    "user.json",
+    "user.json",       // Users must come before OrderSummary
     "order.json",
     "orderItem.json",
-    "adminActions.json",
+    "adminAction.json",
     "orderSummary.json",
     "productSummary.json",
     "sellByCategory.json",
-    "sellSummary.json",
+    "sellSummary.json"
   ];
 
+  // 2️⃣ Seeding loop
   for (const file of orderedFiles) {
     const filePath = path.join(dataDir, file);
     if (!fs.existsSync(filePath)) {

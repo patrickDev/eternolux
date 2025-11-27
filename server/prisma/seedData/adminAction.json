@@ -1,0 +1,16 @@
+[
+  {
+    "adminActionId": "admin-action-1-uuid",
+    "adminId": "9c0ca8b1-9e8b-4b7b-86b7-cbb1a84d8c11",
+    "actionType": "CreateProduct",
+    "details": "Created new product Wireless Mouse",
+    "createdAt": "2025-10-14T12:00:00.000Z"
+  },
+  {
+    "adminActionId": "admin-action-2-uuid",
+    "adminId": "9c0ca8b1-9e8b-4b7b-86b7-cbb1a84d8c11",
+    "actionType": "RefundOrder",
+    "details": "Refunded order f6e7d8c9-0a1b-2c3d-4e5f-6g7h8i9j0k1l",
+    "createdAt": "2025-10-15T14:30:00.000Z"
+  }
+]

@@ -1,6 +1,18 @@
 [
-  { "categoryId": "a3c1b2f4-9d8e-4a76-bd3e-9a5e6b8c1d32", "name": "Electronics" },
-  { "categoryId": "a3c1b2f4-9d8e-4a76-bd3e-9a5e6b8c1d36", "name": "Books" },
-  { "categoryId": "a3c1b2f4-9d8e-4a76-bd3e-9a5e6b8c1d39", "name": "Clothing" },
-  { "categoryId": "a3c1b2f4-9d8e-4a76-bd3e-9a5e6b8c1d23", "name": "Home & Kitchen" }
+  {
+    "categoryId": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
+    "name": "Electronics"
+  },
+  {
+    "categoryId": "b2c3d4e5-f6a7-8b9c-0d1e-2f3a4b5c6d7e",
+    "name": "Books"
+  },
+  {
+    "categoryId": "c3d4e5f6-a7b8-9c0d-1e2f-3a4b5c6d7e8f",
+    "name": "Clothing"
+  },
+  {
+    "categoryId": "d4e5f6a7-b8c9-0d1e-2f3a-4b5c6d7e8f9a",
+    "name": "Home & Kitchen"
+  }
 ]
