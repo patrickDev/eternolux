@@ -1,15 +1,32 @@
-import { PrismaClient } from "@prisma/client";
+
 import fs from "fs";
 import path from "path";
 
-import dotenv from "dotenv";
-dotenv.config();
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+
+// Explicit mapping of file/model names to Prisma client properties
+const modelMap: Record<string, any> = {
+  category: prisma.category,
+  product: prisma.product,
+  user: prisma.user,
+  order: prisma.order,
+  orderItem: prisma.orderItem,
+  adminAction: prisma.adminAction,
+  orderSummary: prisma.orderSummary,
+  productSummary: prisma.productSummary,
+  sellByCategory: prisma.sellByCategory,
+  sellSummary: prisma.sellSummary,
+  productCategory: prisma.productCategory,
+  cart: prisma.cart,
+  cartItem: prisma.cartItem,
+  shippingAddress: prisma.shippingAddress
+};
+
 async function main() {
   const dataDir = path.join(__dirname, "seedData");
-
 
   // Delete dependent tables first
   await prisma.orderItem.deleteMany();
@@ -25,7 +42,7 @@ async function main() {
   await prisma.productCategory.deleteMany();
   await prisma.product.deleteMany();
   await prisma.category.deleteMany();
-  await prisma.user.deleteMany(); // now safe
+  await prisma.user.deleteMany(); // Users last to avoid FK issues
 
   const orderedFiles = [
     "category.json",
@@ -40,7 +57,6 @@ async function main() {
     "sellSummary.json"
   ];
 
-  // 2️⃣ Seeding loop
   for (const file of orderedFiles) {
     const filePath = path.join(dataDir, file);
     if (!fs.existsSync(filePath)) {
@@ -50,9 +66,7 @@ async function main() {
 
     const data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
     const modelName = path.basename(file, path.extname(file));
-    const model = (prisma as any)[
-      modelName.charAt(0).toLowerCase() + modelName.slice(1)
-    ];
+    const model = modelMap[modelName];
 
     if (!model) {
       console.warn(`⚠️  No matching model for ${file}`);
