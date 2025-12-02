@@ -1,23 +1,35 @@
+import { prisma } from "../lib/prisma";
 import { Request, Response } from "express";
-import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
-
-export const getProducts = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const getProducts = async (req: Request, res: Response): Promise<void> => {
   try {
+    try {
+    console.log("Request query:", req.query);
+
     const search = req.query.search?.toString() || "";
+    console.log("Search term:", search);
+
+    // Show all products to confirm database content
+    const all = await prisma.product.findMany();
+    console.log("All products in DB:", all);
+
     const products = await prisma.product.findMany({
       where: {
         name: {
           contains: search,
-          mode: "insensitive", // Case-insensitive search
+          mode: "insensitive",
         },
       },
     });
-    res.json(products);
+
+    console.log("Search results:", products);
+
+    res.json({ products });
+  } catch (error) {
+    console.error("Error retrieving products:", error);
+    res.status(500).json({ message: "Error retrieving products" });
+  }
+
   } catch (error) {
     console.error("Error retrieving products:", error);
     res.status(500).json({ message: "Error retrieving products" });

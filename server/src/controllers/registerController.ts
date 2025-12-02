@@ -1,11 +1,17 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
-import { PrismaClient } from '@prisma/client';
 import dotenv from 'dotenv';
 import { v4 as uuidv4 } from 'uuid';
 
 dotenv.config();
-const prisma = new PrismaClient();
+
+// Use CommonJS require to work with Prisma v7 adapter
+const { PrismaClient } = require('@prisma/client');
+const { PrismaPg } = require('@prisma/adapter-pg');
+
+const connectionString = process.env.DATABASE_URL;
+const adapter = new PrismaPg({ connectionString });
+const prisma = new PrismaClient({ adapter });
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   const { firstName, lastName, email, password, phone } = req.body;

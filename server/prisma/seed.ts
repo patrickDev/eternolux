@@ -1,10 +1,17 @@
 
 import fs from "fs";
 import path from "path";
+import dotenv from "dotenv";
 
-import { PrismaClient } from "@prisma/client";
+dotenv.config();
 
-const prisma = new PrismaClient();
+// Use dynamic require to avoid TypeScript import resolution issues with v7
+const { PrismaClient } = require("@prisma/client");
+const { PrismaPg } = require("@prisma/adapter-pg");
+
+const connectionString = process.env.DATABASE_URL;
+const adapter = new PrismaPg({ connectionString });
+const prisma = new PrismaClient({ adapter });
 
 
 // Explicit mapping of file/model names to Prisma client properties
@@ -42,12 +49,12 @@ async function main() {
   await prisma.productCategory.deleteMany();
   await prisma.product.deleteMany();
   await prisma.category.deleteMany();
-  await prisma.user.deleteMany(); // Users last to avoid FK issues
+  await prisma.user.deleteMany(); 
 
   const orderedFiles = [
     "category.json",
     "product.json",
-    "user.json",       // Users must come before OrderSummary
+    "user.json",       
     "order.json",
     "orderItem.json",
     "adminAction.json",
