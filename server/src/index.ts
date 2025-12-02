@@ -6,10 +6,6 @@ import searchRouter from './routes/searchRoutes';
 console.log("➡ Loading .env file...");
 dotenv.config();
 
-console.log("➡ process.env (important values):");
-console.log("   PORT =", process.env.PORT);
-console.log("   DATABASE_URL =", process.env.DATABASE_URL ? "[loaded]" : "[missing]");
-
 const PORT = Number(process.env.PORT) || 80;
 
 console.log("➡ Initializing app...");
@@ -27,5 +23,5 @@ app.get("/", (req, res) => {
 
 console.log("➡ Attempting to start server...");
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(`✔ Server running at http://localhost:${PORT}`);
+  console.log(`✅ Server is running on port ${PORT}`);
 });
