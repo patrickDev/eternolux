@@ -35,21 +35,6 @@ const modelMap: Record<string, any> = {
 async function main() {
   const dataDir = path.join(__dirname, "seedData");
 
-  // Delete dependent tables first
-  await prisma.orderItem.deleteMany();
-  await prisma.order.deleteMany();
-  await prisma.cartItem.deleteMany();
-  await prisma.cart.deleteMany();
-  await prisma.adminAction.deleteMany();
-  await prisma.shippingAddress.deleteMany();
-  await prisma.orderSummary.deleteMany();
-  await prisma.productSummary.deleteMany();
-  await prisma.sellByCategory.deleteMany();
-  await prisma.sellSummary.deleteMany();
-  await prisma.productCategory.deleteMany();
-  await prisma.product.deleteMany();
-  await prisma.category.deleteMany();
-  await prisma.user.deleteMany(); 
 
   const orderedFiles = [
     "category.json",
