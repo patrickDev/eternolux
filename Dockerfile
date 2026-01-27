@@ -1,3 +1,33 @@
+# ------------------------
+# Base image
+# ------------------------
+FROM node:20-alpine AS base
+WORKDIR /app
+
+# ------------------------
+# Install dependencies
+# ------------------------
+FROM base AS deps
+
+# Frontend dependencies
+COPY client/package*.json ./client/
+RUN cd client && npm install --include=dev
+
+# Backend dependencies
+COPY server/package*.json ./server/
+RUN cd server && npm install
+
+# ------------------------
+# Build frontend (Next.js)
+# ------------------------
+FROM base AS build
+COPY --from=deps /app /app
+COPY client ./client
+RUN cd client && npm run build
+
+# ------------------------
+# Production image
+# ------------------------
 FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
@@ -5,7 +35,7 @@ ENV NODE_ENV=production
 # Copy backend
 COPY --from=deps /app/server ./server
 
-# Copy frontend
+# Copy frontend build & public folder
 COPY --from=build /app/client/.next ./client/.next
 COPY --from=build /app/client/public ./client/public
 COPY --from=deps /app/client/package*.json ./client/
