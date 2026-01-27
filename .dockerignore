@@ -1,0 +1,117 @@
+# flyctl launch added from .gitignore
+**/node_modules
+**/client/node_modules
+**/server/node_modules
+**/client/dist
+**/server/dist
+**/client/.env
+**/server/.env
+**/client/.next
+
+# flyctl launch added from client /.gitignore
+# Node modules
+client /**/node_modules
+
+# Next.js build output
+client /**/.next
+
+# Log files
+client /**/logs
+client /**/*.log
+client /**/npm-debug.log*
+client /**/yarn-debug.log*
+
+# Environment variables
+client /**/.env
+client /**/.env.local
+client /**/.env.development.local
+client /**/.env.test.local
+client /**/.env.production.local
+
+# OS generated files
+client /**/.DS_Store
+
+# Others
+client /**/out
+client /**/build
+client /**/dist
+client /**/.vscode
+client /**/.idea
+client /**/.cache
+client /**/*.swp
+client 
+
+# flyctl launch added from drizzleORM/sqlite-turo-drizzle/.gitignore
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+drizzleORM/sqlite-turo-drizzle/node_modules
+drizzleORM/sqlite-turo-drizzle/.pnp
+drizzleORM/sqlite-turo-drizzle/**/.pnp.*
+drizzleORM/sqlite-turo-drizzle/**/.yarn/*
+!drizzleORM/sqlite-turo-drizzle/**/.yarn/patches
+!drizzleORM/sqlite-turo-drizzle/**/.yarn/plugins
+!drizzleORM/sqlite-turo-drizzle/**/.yarn/releases
+!drizzleORM/sqlite-turo-drizzle/**/.yarn/versions
+
+# testing
+drizzleORM/sqlite-turo-drizzle/coverage
+
+# next.js
+drizzleORM/sqlite-turo-drizzle/.next
+drizzleORM/sqlite-turo-drizzle/out
+
+# production
+drizzleORM/sqlite-turo-drizzle/build
+
+# misc
+drizzleORM/sqlite-turo-drizzle/**/.DS_Store
+drizzleORM/sqlite-turo-drizzle/**/*.pem
+
+# debug
+drizzleORM/sqlite-turo-drizzle/**/npm-debug.log*
+drizzleORM/sqlite-turo-drizzle/**/yarn-debug.log*
+drizzleORM/sqlite-turo-drizzle/**/yarn-error.log*
+drizzleORM/sqlite-turo-drizzle/**/.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+drizzleORM/sqlite-turo-drizzle/**/.env*
+
+# vercel
+drizzleORM/sqlite-turo-drizzle/**/.vercel
+
+# typescript
+drizzleORM/sqlite-turo-drizzle/**/*.tsbuildinfo
+drizzleORM/sqlite-turo-drizzle/**/next-env.d.ts
+
+# flyctl launch added from server/.gitignore
+server/**/node_modules
+# Keep environment variables out of version control
+server/**/.env
+
+server/src/generated/prisma
+
+server/src/generated/prisma
+
+server/src/generated/prisma
+
+server/src/generated/prisma
+
+server/src/generated/prisma
+
+server/src/generated/prisma
+
+server/src/generated/prisma
+
+server/src/generated/prisma
+
+server/src/generated/prisma
+
+server/src/generated/prisma
+
+server/generated/prisma
+
+server/generated/prisma
+
+server/generated/prisma
+fly.toml
