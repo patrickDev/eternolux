@@ -9,8 +9,6 @@ WORKDIR /app
 # ------------------------
 FROM base AS deps
 
-RUN mkdir -p client server
-
 # Frontend deps
 COPY client/package*.json ./client/
 RUN cd client && npm install --include=dev
