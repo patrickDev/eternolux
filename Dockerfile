@@ -1,47 +1,54 @@
 # ------------------------
-# Base image
+# Base
 # ------------------------
 FROM node:20-alpine AS base
 WORKDIR /app
 
 # ------------------------
-# Install dependencies
+# Dependencies
 # ------------------------
 FROM base AS deps
 
-# Frontend dependencies
+RUN mkdir -p client server
+
+# Frontend deps
 COPY client/package*.json ./client/
 RUN cd client && npm install --include=dev
 
-# Backend dependencies
+# Backend deps
 COPY server/package*.json ./server/
 RUN cd server && npm install
 
 # ------------------------
-# Build frontend (Next.js)
+# Build frontend
 # ------------------------
 FROM base AS build
+WORKDIR /app
+
+RUN mkdir -p client
+
 COPY --from=deps /app /app
 COPY client ./client
+
 RUN cd client && npm run build
 
 # ------------------------
-# Production image
+# Runtime
 # ------------------------
 FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
-# Copy backend
+RUN mkdir -p client server
+
+# Backend
 COPY --from=deps /app/server ./server
 
-# Copy frontend build & public folder
+# Frontend
 COPY --from=build /app/client/.next ./client/.next
 COPY --from=build /app/client/public ./client/public
 COPY --from=deps /app/client/package*.json ./client/
 
-# Expose ports
 EXPOSE 3000 4000
 
-# Start backend and frontend
 CMD sh -c "node server/index.js & npm --prefix client start"
