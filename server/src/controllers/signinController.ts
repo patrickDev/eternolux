@@ -1,54 +1,49 @@
-import { Request, Response } from 'express';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import dotenv from 'dotenv';
+import { db } from "../db/client";
+import { users } from "../db/schema";
+import { eq } from "drizzle-orm";
+import { verifyPassword } from "../auth/password";
+import { createSession } from "../auth/createSession";
+import { setSessionCookie } from "../auth/authCookies";
+import type { Request, Response } from "express";
 
-dotenv.config();
-
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
-
-const JWT_SECRET = process.env.JWT_SECRET || 'DADEM-FOODS';
-
-export const signin = async (req: Request, res: Response): Promise<void> => {
+export async function signinController(req: Request, res: Response) {
   const { email, password } = req.body;
 
-  try {
-    const user = await prisma.user.findUnique({
-      where: { email },
-    });
-
-    if (!user) {
-      res.status(400).json({ error: 'User not found' });
-      return;
-    }
-
-    const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
-    if (!isPasswordValid) {
-      res.status(400).json({ error: 'Invalid password' });
-      return;
-    }
-
-    const token = jwt.sign(
-      { userId: user.userId, email: user.email },
-      JWT_SECRET,
-      { expiresIn: '1h' }
-    );
-
-    res.status(200).json({
-      message: 'Login successful',
-      token,
-      user: {
-        userId: user.userId,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        phone: user.phone,
-      }
-    });
-  } catch (error) {
-    console.error('Sign-in error:', error);
-    res.status(500).json({ error: 'Server error during sign-in' });
+  if (!email || !password) {
+    return res.status(400).json({ message: "Email and password are required" });
   }
-};
+
+  const user = await db
+    .select()
+    .from(users)
+    .where(eq(users.email, email))
+    .limit(1)
+    .then((r) => r[0]);
+
+  if (!user) {
+    return res.status(401).json({ message: "Invalid credentials" });
+  }
+
+  const valid = await verifyPassword(password, user.passwordHash);
+  if (!valid) {
+    return res.status(401).json({ message: "Invalid credentials" });
+  }
+
+  // ✅ create session in DB
+  const session = await createSession(user.userId);
+
+  // ✅ set HttpOnly cookie
+  setSessionCookie(res, session.sessionId);
+
+  return res.json({
+    user: {
+      userId: user.userId,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      phone: user.phone,
+      isAdmin: user.isAdmin,
+      createdAt: user.createdAt,
+    },
+  });
+}

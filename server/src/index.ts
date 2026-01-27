@@ -1,27 +1,41 @@
-import express from 'express';
-import dotenv from 'dotenv';
-import shopRouter from './routes/shopRoutes';
-import searchRouter from './routes/searchRoutes';
+// src/index.ts
+import "dotenv/config";
+import express from "express";
+import cors from "cors";
 
-console.log("➡ Loading .env file...");
-dotenv.config();
+import userRoutes from "./routes/userRoutes";
+import productRoutes from "./routes/productRoutes";
+import authRoutes from "./routes/authRoutes";
 
-const PORT = Number(process.env.PORT) || 80;
-
-console.log("➡ Initializing app...");
 const app = express();
+
+// middleware
+//app.use(cors());
+//app.use(express.json());
+
+
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  })
+);
 
 app.use(express.json());
 
-// ⬅ REGISTER YOUR ROUTES HERE
-app.use("/", shopRouter);
-app.use("/products", searchRouter);
 
-app.get("/", (req, res) => {
-  res.send("API is running");
+// routes
+app.use("/api/users", userRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/products", productRoutes);
+
+// health check
+app.get("/health", (_req, res) => {
+  res.json({ status: "ok" });
 });
 
-console.log("➡ Attempting to start server...");
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`✅ Server is running on port ${PORT}`);
+const PORT = process.env.PORT || 4000;
+
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
 });

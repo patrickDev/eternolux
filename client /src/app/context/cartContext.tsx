@@ -6,8 +6,8 @@ import React, {
   useMemo,
   CSSProperties,
 } from "react";
-import { CartItem } from "@/state/api";
-import { Product } from "@/state/api";
+import { CartItem } from "@/app/api/api";
+import { Product } from "@/app/api/api";
 
 // Context Type
 interface CartContextType {

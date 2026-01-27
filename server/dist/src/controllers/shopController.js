@@ -10,22 +10,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getShopData = void 0;
-const client_1 = require("@prisma/client");
-const prisma = new client_1.PrismaClient();
+const prisma_1 = require("../../lib/prisma");
 const getShopData = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const popularProducts = yield prisma.product.findMany({
+        const popularProducts = yield prisma_1.prisma.product.findMany({
             take: 15,
-            orderBy: {
-                stock: "desc"
-            }
+            orderBy: { stock: "desc" },
         });
-        res.json({
-            popularProducts
-        });
+        res.json({ popularProducts });
     }
     catch (error) {
-        res.status(500).json({ message: "Error retreiving shop metrics " });
+        console.error("Error retrieving shop metrics:", error);
+        res.status(500).json({ message: "Error retrieving shop metrics" });
     }
 });
 exports.getShopData = getShopData;

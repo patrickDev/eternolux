@@ -1,127 +1,113 @@
 "use client";
 
-import React, { useState } from "react";
-import Header from "../(components)/Header";
-import Navbar from "../(components)/Navbar";
-import Footer from "../(components)/Footer";
-import Image from "next/image";
+import React, { useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { useCart } from "@/app/context/cartContext";
-import { Product } from "@/state/api";
-import CartModal from "../checkout/cartModal";
-import { useGetShopDataQuery } from "@/state/api";
-import image1 from "@/state/images/product1.png";
+import Image from "next/image";
 
-const ITEMS_PER_PAGE = 8;
+import Navbar from "@/app/(components)/Navbar";
+import Footer from "@/app/(components)/Footer";
+import { useGetProductsQuery, type Product } from "@/app/api/api";
+import cardImg from "@/state/images/product1.png";
 
-const Shop = () => {
-  const { data, isError, isLoading } = useGetShopDataQuery();
-  const { addToCart } = useCart();
-  const [currentPage, setCurrentPage] = useState(1);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+export default function ShopPage() {
+  const searchParams = useSearchParams();
+  const raw = searchParams.get("search") ?? "";
 
-  if (isLoading) return <div className="py-4 text-black">Loading...</div>;
-  if (isError || !data)
-    return (
-      <div className="text-center text-red-500 py-4">
-        Failed to fetch products
-      </div>
-    );
+  // Normalize (trim + collapse spaces)
+  const query = useMemo(() => raw.replace(/\s+/g, " ").trim(), [raw]);
 
-  const products: Product[] = data.popularProducts.map((product) => ({
-    ...product,
-    price: Number(product.price),
-  }));
-  const totalPages = Math.ceil(products.length / ITEMS_PER_PAGE);
-
-  const handleAddToCart = (product: Product) => {
-    addToCart(product);
-    setSelectedProduct(product);
-  };
-
-  const handleCloseCart = () => setSelectedProduct(null);
-  const handlePreviousPage = () =>
-    currentPage > 1 && setCurrentPage(currentPage - 1);
-  const handleNextPage = () =>
-    currentPage < totalPages && setCurrentPage(currentPage + 1);
-
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const endIndex = startIndex + ITEMS_PER_PAGE;
-  const currentProducts = products.slice(startIndex, endIndex);
+  // ✅ THIS is the key: pass query into the API hook
+  const {
+    data: products = [],
+    isLoading,
+    isError,
+  } = useGetProductsQuery(query ? query : undefined);
 
   return (
-    <div className="w-full bg-white text-black">
+    <div className="min-h-screen bg-white text-black">
       <Navbar />
-      <Header name="Shop" />
-      <div id="products" className="mx-auto px-10 py-5 w-full mt-5">
-        <h1 className="text-4xl font-bold mb-6 text-center mt-16">
-  All Products
-         </h1>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-          {currentProducts.map((product) => (
-            <div
-              key={product.productId}
-              className="border shadow rounded-md p-4 flex flex-col items-center justify-center text-center"
-            >
-              <Link
-                href={`/shop/${product.productId}`}
-                className="w-full flex flex-col items-center"
-              >
-                <h3 className="text-lg font-semibold mt-2">{product.name}</h3>
-                <Image
-                  src={image1}
-                  alt={product.name}
-                  width={220}
-                  height={500}
-                  className="mb-3 rounded-2xl object-cover"
-                />
-                <p className="mt-2">${product.price.toFixed(2)}</p>
-              </Link>
-              <button
-                onClick={() => handleAddToCart(product)}
-                className="bg-black text-white px-4 py-2 text-sm rounded-lg hover:bg-gray-800 transition-all mt-4"
-              >
-                Add to Cart
-              </button>
+
+      <main className="pt-28">
+        <div className="mx-auto max-w-7xl px-6 lg:px-10">
+          <div className="flex items-end justify-between gap-6">
+            <div>
+              <h1 className="text-3xl font-bold">Shop</h1>
+              {query ? (
+                <p className="mt-2 text-gray-600">
+                  Showing results for <span className="font-semibold">“{query}”</span>
+                </p>
+              ) : (
+                <p className="mt-2 text-gray-600">Browse all products</p>
+              )}
             </div>
-          ))}
-        </div>
 
-        <div className="flex justify-center items-center mt-8">
-          <button
-            onClick={handlePreviousPage}
-            disabled={currentPage === 1}
-            className={`mr-4 px-6 py-2 rounded-md text-white ${
-              currentPage === 1 ? "bg-gray-400" : "bg-black hover:bg-gray-800"
-            }`}
-          >
-            &#8592;
-          </button>
-          <span className="font-bold mx-4">
-            Page {currentPage} of {totalPages}
-          </span>
-          <button
-            onClick={handleNextPage}
-            disabled={currentPage === totalPages}
-            className={`ml-4 px-6 py-2 rounded-md text-white ${
-              currentPage === totalPages
-                ? "bg-gray-400"
-                : "bg-black hover:bg-gray-800"
-            }`}
-          >
-            &#8594;
-          </button>
-        </div>
+            {query ? (
+              <Link
+                href="/shop"
+                className="text-sm font-semibold hover:underline underline-offset-4"
+              >
+                Clear search
+              </Link>
+            ) : null}
+          </div>
 
-        <CartModal
-          isOpen={!!selectedProduct}
-          onClose={handleCloseCart}
-          product={selectedProduct}
-        />
-      </div>
+          {isLoading ? (
+            <div className="mt-10 text-center text-gray-700">Loading products...</div>
+          ) : isError ? (
+            <div className="mt-10 text-center text-red-600">
+              Could not load products. Check your API.
+            </div>
+          ) : products.length === 0 ? (
+            <div className="mt-10 text-center text-gray-700">
+              No products found{query ? ` for “${query}”` : ""}.
+            </div>
+          ) : (
+            <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {products.map((p: Product) => (
+                <Link
+                  key={p.productId}
+                  href={`/homebase/${p.productId}`}
+                  className="rounded-2xl border border-gray-200 bg-white p-4 hover:shadow-md transition block"
+                >
+                  <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-gray-50">
+                    <Image
+                      src={cardImg}
+                      alt={p.name}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 1024px) 50vw, 25vw"
+                    />
+                  </div>
+
+                  <div className="mt-4 flex items-start justify-between gap-3">
+                    <div>
+                      <div className="font-semibold leading-tight">{p.name}</div>
+                      <div className="text-sm text-gray-600">
+                        {p.description ?? "Eau de Parfum"}
+                      </div>
+                    </div>
+                    {typeof p.rating === "number" ? (
+                      <div className="text-xs font-semibold text-gray-700">
+                        {p.rating.toFixed(1)} ★
+                      </div>
+                    ) : null}
+                  </div>
+
+                  <div className="mt-3 flex items-center justify-between">
+                    <div className="font-bold">${p.price}</div>
+                    <div className="text-xs text-gray-600">
+                      {p.stock > 0 ? `${p.stock} in stock` : "Out of stock"}
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      </main>
+
       <Footer />
     </div>
   );
-};
-
-export default Shop;
+}

@@ -15,15 +15,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.signin = void 0;
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const client_1 = require("@prisma/client");
 const dotenv_1 = __importDefault(require("dotenv"));
+const prisma_1 = require("../../lib/prisma");
 dotenv_1.default.config();
-const prisma = new client_1.PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || 'DADEM-FOODS';
 const signin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, password } = req.body;
     try {
-        const user = yield prisma.user.findUnique({
+        const user = yield prisma_1.prisma.user.findUnique({
             where: { email },
         });
         if (!user) {

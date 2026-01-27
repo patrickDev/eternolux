@@ -12,12 +12,33 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const client_1 = require("@prisma/client");
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
-const prisma = new client_1.PrismaClient();
+// Use dynamic require to avoid TypeScript import resolution issues with v7
+const { PrismaClient } = require("@prisma/client");
+const { PrismaPg } = require("@prisma/adapter-pg");
+const connectionString = process.env.DATABASE_URL;
+const adapter = new PrismaPg({ connectionString });
+const prisma = new PrismaClient({ adapter });
+// Explicit mapping of file/model names to Prisma client properties
+const modelMap = {
+    category: prisma.category,
+    product: prisma.product,
+    user: prisma.user,
+    order: prisma.order,
+    orderItem: prisma.orderItem,
+    adminAction: prisma.adminAction,
+    orderSummary: prisma.orderSummary,
+    productSummary: prisma.productSummary,
+    sellByCategory: prisma.sellByCategory,
+    sellSummary: prisma.sellSummary,
+    productCategory: prisma.productCategory,
+    cart: prisma.cart,
+    cartItem: prisma.cartItem,
+    shippingAddress: prisma.shippingAddress
+};
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         const dataDir = path_1.default.join(__dirname, "seedData");
@@ -27,11 +48,11 @@ function main() {
             "user.json",
             "order.json",
             "orderItem.json",
-            "adminActions.json",
+            "adminAction.json",
             "orderSummary.json",
             "productSummary.json",
             "sellByCategory.json",
-            "sellSummary.json",
+            "sellSummary.json"
         ];
         for (const file of orderedFiles) {
             const filePath = path_1.default.join(dataDir, file);
@@ -41,7 +62,7 @@ function main() {
             }
             const data = JSON.parse(fs_1.default.readFileSync(filePath, "utf-8"));
             const modelName = path_1.default.basename(file, path_1.default.extname(file));
-            const model = prisma[modelName.charAt(0).toLowerCase() + modelName.slice(1)];
+            const model = modelMap[modelName];
             if (!model) {
                 console.warn(`⚠️  No matching model for ${file}`);
                 continue;

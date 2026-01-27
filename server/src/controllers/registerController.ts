@@ -1,50 +1,50 @@
-import { Request, Response } from 'express';
-import bcrypt from 'bcryptjs';
-import dotenv from 'dotenv';
-import { v4 as uuidv4 } from 'uuid';
+import { Request, Response } from "express";
+import bcrypt from "bcryptjs";
+import crypto from "node:crypto";
+import { eq } from "drizzle-orm";
 
-dotenv.config();
+import { db } from "../db/client";
+import { users } from "../db/schema";
 
-// Use CommonJS require to work with Prisma v7 adapter
-const { PrismaClient } = require('@prisma/client');
-const { PrismaPg } = require('@prisma/adapter-pg');
-
-const connectionString = process.env.DATABASE_URL;
-const adapter = new PrismaPg({ connectionString });
-const prisma = new PrismaClient({ adapter });
-
-export const register = async (req: Request, res: Response): Promise<void> => {
+export const registerController = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   const { firstName, lastName, email, password, phone } = req.body;
 
   if (!firstName || !lastName || !email || !password || !phone) {
-    res.status(400).send('All fields are required');
+    res.status(400).json({ message: "All fields are required" });
     return;
   }
 
   try {
-    // Check if user already exists
-    const existingUser = await prisma.user.findUnique({ where: { email } });
-    if (existingUser) {
-      res.status(400).send('Email already in use');
+    // Check if user exists
+    const existingUser = await db
+      .select({ userId: users.userId })
+      .from(users)
+      .where(eq(users.email, email))
+      .limit(1);
+
+    if (existingUser.length > 0) {
+      res.status(400).json({ message: "Email already in use" });
       return;
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const passwordHash = await bcrypt.hash(password, 10);
 
-    await prisma.user.create({
-      data: {
-        userId: uuidv4(),
-        firstName,
-        lastName,
-        email, 
-        passwordHash: hashedPassword,
-        phone
-      },
+    await db.insert(users).values({
+      userId: crypto.randomUUID(),
+      firstName,
+      lastName,
+      email,
+      passwordHash,
+      phone,
+      isAdmin: false,
     });
 
-    res.status(201).send('User registered 7889');
+    res.status(201).json({ message: "User registered successfully" });
   } catch (error) {
-    console.error('Error registering user:', error);
-    res.status(500).send('Internal server error');
+    console.error("Register error:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };

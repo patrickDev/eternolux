@@ -1,11 +1,9 @@
 import { Router } from "express";
-import { register } from "../controllers/registerController";
+import { registerController } from "../controllers/registerController";
 
 const router = Router();
 
-//router.get("/", getProducts);
-
-router.post('/register', register);
-
+// POST /api/auth/register
+router.post("/register", registerController);
 
 export default router;

@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
-import { useRegisterMutation } from "@/state/api";
+
+import { useRegisterMutation } from "@/app/api/api";
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -18,17 +18,19 @@ export default function RegisterPage() {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [successMessage, setSuccessMessage] = useState("");
+
   const [register, { isLoading }] = useRegisterMutation();
   const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
+
     if (errors[id]) {
       setErrors((prev) => {
-        const newErrors = { ...prev };
-        delete newErrors[id];
-        return newErrors;
+        const next = { ...prev };
+        delete next[id];
+        return next;
       });
     }
   };
@@ -65,14 +67,26 @@ export default function RegisterPage() {
     return Object.keys(newErrors).length === 0;
   };
 
+  const extractErrorMessage = (err: unknown) => {
+    // RTK Query errors can be several shapes; handle common ones safely
+    if (typeof err === "object" && err !== null) {
+      const anyErr = err as any;
+      if (typeof anyErr?.data === "string") return anyErr.data;
+      if (typeof anyErr?.data?.message === "string") return anyErr.data.message;
+      if (typeof anyErr?.error === "string") return anyErr.error;
+      if (typeof anyErr?.message === "string") return anyErr.message;
+    }
+    return "Registration failed. Please try again.";
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
 
     try {
-      const result = await register({
-        fname: formData.firstName,
-        lname: formData.lastName,
+      await register({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
         email: formData.email,
         password: formData.password,
         phone: formData.phone,
@@ -80,7 +94,6 @@ export default function RegisterPage() {
 
       setSuccessMessage("Account created successfully! Redirecting...");
       setErrors({});
-      localStorage.setItem("token", result.token);
 
       setFormData({
         firstName: "",
@@ -91,18 +104,16 @@ export default function RegisterPage() {
         phone: "",
       });
 
-      setTimeout(() => router.push("/checkout"), 2000);
-    } catch (error: any) {
+      // If you want to go to sign-in instead, change this route
+      setTimeout(() => router.push("/checkout"), 800);
+    } catch (err) {
       setSuccessMessage("");
-      const message =
-        error?.data || error?.message || "Registration failed. Please try again.";
+      const message = extractErrorMessage(err);
 
       setErrors((prev) => ({
         ...prev,
-        email: message.includes("Email already in use")
-          ? "Email already in use. Please try a different one."
-          : "",
-        form: !message.includes("Email already in use") ? message : "",
+        email: message.toLowerCase().includes("email") ? message : prev.email,
+        form: !message.toLowerCase().includes("email") ? message : "",
       }));
     }
   };
@@ -110,14 +121,12 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen bg-white text-black flex flex-col items-center justify-center p-4">
       <div className="absolute top-4 left-4">
-        <Image
-          src="https://s3-inventorymanagement12.s3.us-east-2.amazonaws.com/logo.png"
-          alt="EternoLuxLogo"
-          width={60}
-          height={60}
-          className="rounded cursor-pointer hover:opacity-90 transition-opacity"
+        {/* next/image cannot use src="" — use a real logo later */}
+        <div
+          className="w-[60px] h-[60px] rounded bg-gray-100 cursor-pointer hover:opacity-90 transition-opacity"
           onClick={() => router.push("/")}
-          priority
+          aria-label="Go to home"
+          role="button"
         />
       </div>
 
@@ -252,7 +261,9 @@ export default function RegisterPage() {
               aria-invalid={!!errors.confirmPassword}
             />
             {errors.confirmPassword && (
-              <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
+              <p className="mt-1 text-sm text-red-600">
+                {errors.confirmPassword}
+              </p>
             )}
           </div>
 

@@ -14,11 +14,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.register = void 0;
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
-const client_1 = require("@prisma/client");
 const dotenv_1 = __importDefault(require("dotenv"));
 const uuid_1 = require("uuid");
+const prisma_1 = require("../../lib/prisma");
 dotenv_1.default.config();
-const prisma = new client_1.PrismaClient();
 const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { firstName, lastName, email, password, phone } = req.body;
     if (!firstName || !lastName || !email || !password || !phone) {
@@ -27,13 +26,13 @@ const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
     try {
         // Check if user already exists
-        const existingUser = yield prisma.user.findUnique({ where: { email } });
+        const existingUser = yield prisma_1.prisma.user.findUnique({ where: { email } });
         if (existingUser) {
             res.status(400).send('Email already in use');
             return;
         }
         const hashedPassword = yield bcryptjs_1.default.hash(password, 10);
-        yield prisma.user.create({
+        yield prisma_1.prisma.user.create({
             data: {
                 userId: (0, uuid_1.v4)(),
                 firstName,

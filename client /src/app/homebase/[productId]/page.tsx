@@ -1,172 +1,377 @@
 "use client";
-
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Product } from "@/state/api"; // Ensure the Product type is imported
+
 import { useCart } from "@/app/context/cartContext";
-import { useGetShopDataQuery } from "@/state/api";
+import { useGetProductsQuery, type Product } from "@/app/api/api";
+
 import CartModal from "@/app/checkout/cartModal";
 import image2 from "@/state/images/product1.png";
 
+type CartItem = Product & { quantity: number };
+
 const ProductDetails = ({ params }: { params: { productId: string } }) => {
-  const { productId } = params; // Access productId from params
+  const { productId } = params;
   const router = useRouter();
+
   const { addToCart } = useCart();
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [product, setProduct] = useState<Product | null>(null);
   const [quantity, setQuantity] = useState(1);
 
-  // Using the custom hook to fetch data
-  const { data, isError, isLoading } = useGetShopDataQuery();
+  const { data: products = [], isError, isLoading } = useGetProductsQuery();
 
+  const product = useMemo(
+    () => products.find((p) => p.productId === productId),
+    [products, productId]
+  );
+
+  // More items (exclude current product)
+  const moreItems = useMemo(() => {
+    return products.filter((p) => p.productId !== productId).slice(0, 10);
+  }, [products, productId]);
+
+  // Keep quantity within stock
   useEffect(() => {
-    if (!isLoading && data && data.popularProducts) {
-      const foundProduct = data.popularProducts.find(
-        (prod: Product) => prod.productId === productId
-      );
-      setProduct(foundProduct || null); // Handle case if product is not found
+    if (product?.stock != null && product.stock > 0) {
+      setQuantity((q) => Math.min(q, product.stock));
+      return;
     }
-  }, [data, isLoading, productId]);
+    setQuantity(1);
+  }, [product]);
 
   if (isLoading) {
-    return <div className="text-center py-10">Loading...</div>;
+    return (
+      <div className="container mx-auto px-4 py-24 max-w-6xl">
+        <div className="rounded-2xl border border-gray-200 bg-white p-10 shadow-sm text-center">
+          <div className="text-sm text-gray-600">Loading product…</div>
+        </div>
+      </div>
+    );
   }
 
-  if (isError || !data || !data.popularProducts) {
+  if (isError) {
     return (
-      <div className="text-center py-10">
-        <h2 className="text-xl font-semibold text-red-600">
-          Failed to fetch product details
-        </h2>
-        <button
-          className="mt-4 bg-[#008081] text-white px-4 py-2 rounded"
-          onClick={() => router.push("/homebase")}
-        >
-          Go Back to Homebase
-        </button>
+      <div className="container mx-auto px-4 py-24 max-w-6xl">
+        <div className="rounded-2xl border border-gray-200 bg-white p-10 shadow-sm text-center">
+          <h2 className="text-xl font-semibold text-red-600">
+            We couldn’t load this product
+          </h2>
+          <p className="mt-2 text-sm text-gray-600">
+            Please try again, or return to the catalog.
+          </p>
+          <button
+            className="mt-6 rounded-xl bg-black text-white px-5 py-2.5 font-semibold hover:bg-gray-900 transition"
+            onClick={() => router.push("/homebase")}
+          >
+            Back to Homebase
+          </button>
+        </div>
       </div>
     );
   }
 
   if (!product) {
     return (
-      <div className="text-center py-10">
-        <h2 className="text-xl font-semibold">Product not found</h2>
-        <button
-          className="mt-4 bg-[#008081] text-white px-4 py-2 rounded"
-          onClick={() => router.push("/homebase")}
-        >
-          Go Back to Homebase
-        </button>
+      <div className="container mx-auto px-4 py-24 max-w-6xl">
+        <div className="rounded-2xl border border-gray-200 bg-white p-10 shadow-sm text-center">
+          <h2 className="text-xl font-semibold text-gray-900">Product not found</h2>
+          <p className="mt-2 text-sm text-gray-600">
+            The item may have been removed or is temporarily unavailable.
+          </p>
+          <button
+            className="mt-6 rounded-xl bg-black text-white px-5 py-2.5 font-semibold hover:bg-gray-900 transition"
+            onClick={() => router.push("/homebase")}
+          >
+            Back to Homebase
+          </button>
+        </div>
       </div>
     );
   }
 
   const incrementQuantity = () => {
-    if (product.stock && quantity < product.stock) {
-      setQuantity((prev) => Math.min(prev + 1, product.stock)); // Limit to stock quantity
-    }
+    if (product.stock > 0) setQuantity((prev) => Math.min(prev + 1, product.stock));
   };
 
   const decrementQuantity = () => {
-    setQuantity((prev) => Math.max(prev - 1, 1)); // Minimum of 1
+    setQuantity((prev) => Math.max(prev - 1, 1));
   };
 
   const handleAddToCart = () => {
-    if (product) {
-      for (let i = 0; i < quantity; i++) {
-        addToCart(product); // Add to cart multiple times to account for quantity
-      }
-      setTimeout(() => setIsCartOpen(true), 0);
-    }
+    if (product.stock <= 0) return;
+    const item: CartItem = { ...product, quantity };
+    addToCart(item as unknown as Product);
+    setIsCartOpen(true);
   };
 
+  const price = Number(product.price);
+  const inStock = product.stock > 0;
+
   return (
-    <div>
-      <div className="container mx-auto px-4 py-8 max-w-5xl mt-24">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Image Section */}
-          <div className="flex justify-center items-center">
-            <Image
-              src={image2}
-              alt={product.name}
-              width={500}
-              height={500}
-              className="rounded-lg shadow-lg border-4 border-[#008081]"
-            />
-          </div>
+    <div className="container mx-auto px-4 py-10 max-w-6xl mt-20">
+      {/* Subtle breadcrumb / back */}
+      <div className="mb-6 flex items-center justify-between">
+        <button
+          type="button"
+          onClick={() => router.push("/homebase")}
+          className="text-sm font-semibold text-gray-700 hover:text-gray-900 hover:underline transition"
+        >
+          ← Back to catalog
+        </button>
+      </div>
 
-          {/* Details Section */}
-          <div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              {product.name}
-            </h1>
-            <p className="text-2xl text-gray-700 font-semibold mb-6">
-              ${Number(product.price).toFixed(2)}
-            </p>
-
-            <p className="text-lg text-gray-600 leading-relaxed mb-6">
-              {product.description}
-            </p>
-
-            {/* Rating */}
-            <div className="flex items-center mb-4">
-              <span className="text-yellow-500 font-bold text-lg">
-                {product.rating} ★
-              </span>
-              <span className="ml-2 text-gray-500">
-                (Based on {product.rating} reviews)
-              </span>
+      {/* TOP: 2-column hero */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+        {/* Image */}
+        <div className="flex justify-center items-start">
+          <div className="w-full rounded-2xl border border-gray-200 bg-white shadow-sm p-4">
+            <div className="rounded-xl overflow-hidden border border-gray-100 bg-gray-50 flex items-center justify-center">
+              <Image
+                src={image2}
+                alt={product.name}
+                width={900}
+                height={900}
+                className="w-full h-auto object-cover"
+                priority
+              />
             </div>
 
-            {/* Stock Info */}
-            <p
-              className={`font-semibold mb-4 ${
-                product.stock > 0 ? "text-[#008081]" : "text-red-600"
-              }`}
-            >
-              {product.stock > 0 ? "In Stock" : "Out of Stock"}
+            {/* Trust row (optional UI cues) */}
+            <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs text-gray-600">
+              <div className="rounded-lg border border-gray-200 bg-white py-2">
+                Secure checkout
+              </div>
+              <div className="rounded-lg border border-gray-200 bg-white py-2">
+                Fast shipping
+              </div>
+              <div className="rounded-lg border border-gray-200 bg-white py-2">
+                Easy returns
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Purchase / Info */}
+        <div>
+          <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight mb-3">
+            {product.name}
+          </h1>
+
+          <div className="flex items-end justify-between gap-4 mb-4">
+            <p className="text-2xl text-gray-900 font-semibold">
+              ${price.toFixed(2)}
             </p>
 
-            {/* Quantity Selector and Add to Cart */}
-            <div className="flex items-center gap-4 mb-8">
-              <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
+            <div className="text-right">
+              <div className="text-sm font-semibold text-gray-900">
+                {(product.rating ?? 0).toFixed(1)} ★
+              </div>
+              <div className="text-xs text-gray-500">
+                {product.rating ?? 0} reviews
+              </div>
+            </div>
+          </div>
+
+          <p className="text-base text-gray-600 leading-relaxed mb-6">
+            {product.description ?? ""}
+          </p>
+
+          {/* Stock badge */}
+          <div className="mb-6">
+            <span
+              className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold border ${
+                inStock
+                  ? "border-gray-200 bg-white text-gray-900"
+                  : "border-red-200 bg-red-50 text-red-700"
+              }`}
+            >
+              {inStock ? "In Stock" : "Out of Stock"}
+            </span>
+          </div>
+
+          {/* Buy box */}
+          <div className="rounded-2xl border border-gray-200 bg-white shadow-sm p-5">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+              {/* Quantity */}
+              <div className="inline-flex items-center rounded-xl border border-gray-200 overflow-hidden bg-white">
                 <button
+                  type="button"
                   onClick={decrementQuantity}
-                  className="px-3 py-2 bg-gray-200 text-gray-700 hover:bg-gray-300 transition"
+                  className="px-4 py-2 text-gray-900 hover:bg-gray-50 transition disabled:opacity-50"
                   disabled={quantity <= 1}
+                  aria-label="Decrease quantity"
                 >
-                  -
+                  –
                 </button>
-                <input
-                  type="text"
-                  value={quantity}
-                  readOnly
-                  className="w-12 text-center text-lg border-none focus:outline-none"
-                />
+
+                <div className="px-4 py-2 text-center min-w-[56px] font-semibold text-gray-900">
+                  {quantity}
+                </div>
+
                 <button
+                  type="button"
                   onClick={incrementQuantity}
-                  className="px-3 py-2 bg-gray-200 text-gray-700 hover:bg-gray-300 transition"
-                  disabled={quantity >= (product.stock || 0)}
+                  className="px-4 py-2 text-gray-900 hover:bg-gray-50 transition disabled:opacity-50"
+                  disabled={!inStock || quantity >= product.stock}
+                  aria-label="Increase quantity"
                 >
                   +
                 </button>
               </div>
+
+              {/* CTA */}
               <button
+                type="button"
                 onClick={handleAddToCart}
-                className="bg-[#008081] text-white px-8 py-4 text-lg rounded-lg hover:bg-[#006a6a] transition-all transform hover:scale-105"
+                className="flex-1 inline-flex justify-center items-center rounded-xl bg-black text-white px-8 py-3 font-semibold hover:bg-gray-900 transition disabled:opacity-60 disabled:cursor-not-allowed"
+                disabled={!inStock}
               >
-                Add to Cart
+                {inStock ? "Add to Cart" : "Unavailable"}
               </button>
-              {/* Cart Modal */}
-              <CartModal
-                isOpen={isCartOpen}
-                onClose={() => setIsCartOpen(false)}
-              />
+
+              <CartModal isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+            </div>
+
+            {/* Order summary line */}
+            <div className="mt-4 flex items-center justify-between text-sm text-gray-600">
+              <span>Subtotal</span>
+              <span className="font-semibold text-gray-900">
+                ${(price * quantity).toFixed(2)}
+              </span>
+            </div>
+
+            <div className="mt-4">
+              <button
+                type="button"
+                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 font-semibold text-gray-900 hover:bg-gray-50 transition"
+                onClick={() => router.push("/homebase")}
+              >
+                Continue shopping
+              </button>
             </div>
           </div>
         </div>
+      </div>
+
+      {/* PRODUCT DETAILS (professional full-width section) */}
+      <div className="mt-12 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="flex items-end justify-between gap-4 mb-5">
+          <div>
+            <h2 className="text-lg font-bold text-gray-900">Product Details</h2>
+            <p className="text-sm text-gray-600">
+              Key information to help you purchase with confidence.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Description */}
+          <div className="md:col-span-2">
+            <div className="rounded-xl border border-gray-200 bg-gray-50 p-5">
+              <div className="text-sm font-semibold text-gray-900 mb-2">
+                Overview
+              </div>
+              <p className="text-sm text-gray-700 leading-relaxed">
+                {product.description ?? "No description available."}
+              </p>
+            </div>
+          </div>
+
+          {/* Specs */}
+          <div className="rounded-xl border border-gray-200 bg-white p-5">
+            <div className="text-sm font-semibold text-gray-900 mb-3">
+              Specifications
+            </div>
+
+            <div className="space-y-3 text-sm">
+              <div className="flex items-center justify-between border-b border-gray-100 pb-2">
+                <span className="text-gray-700 font-semibold">SKU</span>
+                <span className="text-gray-600">{product.productId}</span>
+              </div>
+
+              <div className="flex items-center justify-between border-b border-gray-100 pb-2">
+                <span className="text-gray-700 font-semibold">Price</span>
+                <span className="text-gray-600">${price.toFixed(2)}</span>
+              </div>
+
+              <div className="flex items-center justify-between border-b border-gray-100 pb-2">
+                <span className="text-gray-700 font-semibold">Availability</span>
+                <span className="text-gray-600">{inStock ? "In stock" : "Out of stock"}</span>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="text-gray-700 font-semibold">Rating</span>
+                <span className="text-gray-600">
+                  {(product.rating ?? 0).toFixed(1)} ★
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* MORE ITEMS (premium horizontal carousel) */}
+      <div className="mt-12">
+        <div className="flex items-end justify-between mb-4">
+          <div>
+            <h2 className="text-lg font-bold text-gray-900">More items</h2>
+            <p className="text-sm text-gray-600">
+              Customers also explore these products.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            className="text-sm font-semibold text-gray-900 hover:underline"
+            onClick={() => router.push("/homebase")}
+          >
+            View all
+          </button>
+        </div>
+
+        {moreItems.length === 0 ? (
+          <div className="rounded-2xl border border-gray-200 bg-white p-6 text-sm text-gray-600">
+            No other products yet.
+          </div>
+        ) : (
+          <div className="flex gap-4 overflow-x-auto pb-3">
+            {moreItems.map((p) => (
+              <button
+                key={p.productId}
+                type="button"
+                onClick={() => router.push(`/homebase/${p.productId}`)}
+                className="min-w-[260px] text-left rounded-2xl border border-gray-200 bg-white p-3 hover:bg-gray-50 transition flex-shrink-0 shadow-sm"
+              >
+                <div className="h-40 w-full rounded-xl border border-gray-100 bg-gray-50 overflow-hidden flex items-center justify-center">
+                  <Image
+                    src={image2}
+                    alt={p.name}
+                    width={520}
+                    height={520}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+
+                <div className="mt-3">
+                  <div className="font-semibold text-gray-900 truncate">{p.name}</div>
+                  <div className="text-xs text-gray-600 truncate">
+                    {p.description ?? "Eau de Parfum"}
+                  </div>
+
+                  <div className="mt-2 flex items-center justify-between">
+                    <div className="text-sm font-bold text-gray-900">${Number(p.price).toFixed(2)}</div>
+                    {typeof p.rating === "number" ? (
+                      <div className="text-xs text-gray-600">
+                        {Number(p.rating).toFixed(1)} ★
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

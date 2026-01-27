@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState } from "react";
-import { User } from "@/state/api";
+import { User } from "@/app/api/api";
 
 type UserContextType = {
   user: User | null;
@@ -20,7 +20,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
 
   const logout = async () => {
     try {
-      await fetch("/api/logout", {
+      await fetch("/api/auth/logout", {
         method: "POST",
         credentials: "include",
       });
@@ -39,6 +39,8 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
 
 export const useUser = () => {
   const context = useContext(UserContext);
-  if (!context) throw new Error("useUser must be used within a UserProvider");
+  if (!context) {
+    throw new Error("useUser must be used within a UserProvider");
+  }
   return context;
 };
