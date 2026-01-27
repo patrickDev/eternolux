@@ -1,9 +1,9 @@
-# fly.toml app configuration file generated for eternolux-nameless-river-6265 on 2026-01-26T21:27:56-06:00
+# fly.toml app configuration file generated for eternolux on 2026-01-26T22:45:00-06:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'eternolux-nameless-river-6265'
+app = 'eternolux'
 primary_region = 'dfw'
 
 [build]
@@ -15,6 +15,5 @@ primary_region = 'dfw'
 
 [[vm]]
   memory = '1gb'
-  cpu_kind = 'shared'
   cpus = 1
   memory_mb = 1024
