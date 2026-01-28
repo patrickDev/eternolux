@@ -34,8 +34,8 @@ app.get("/health", (_req, res) => {
   res.json({ status: "ok" });
 });
 
-const PORT = process.env.PORT || 4000;
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-});
+const port = Number(process.env.SERVER_PORT || 4000);
+app.listen(port, "0.0.0.0");
+
+
