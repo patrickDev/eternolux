@@ -4,7 +4,7 @@ import path from "node:path";
 import crypto from "node:crypto";
 import { eq } from "drizzle-orm";
 
-import { db } from "../src/db/tables";
+import { db } from "../src/db/client"
 import {
   users,
   categories,
