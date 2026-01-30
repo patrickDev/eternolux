@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const registerController_1 = require("../controllers/registerController");
 const router = (0, express_1.Router)();
-//router.get("/", getProducts);
-router.post('/register', registerController_1.register);
+// POST /api/auth/register
+router.post("/register", registerController_1.registerController);
 exports.default = router;
+//# sourceMappingURL=registerRoutes.js.map

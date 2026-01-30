@@ -1,40 +1,30 @@
 import { NextResponse } from "next/server";
 
-/**
- * Proxy GET /api/products
- * → forwards request to Express backend
- * → preserves HttpOnly session cookies
- */
 export async function GET(request: Request) {
+  const url = new URL(request.url);
+  const backendUrl = process.env.BACKEND_URL;
+  
+  // ✅ FIX: Ensure all search params (?productId=123) are forwarded to the backend
+  const target = `${backendUrl}/api/products${url.search}`;
+
   try {
-    // Forward query params (e.g. ?search=...)
-    const { search } = new URL(request.url);
-
-    const backendUrl =
-      process.env.NEXT_PUBLIC_BACKEND_URL;
-
-    const res = await fetch(`${backendUrl}/api/products${search}`, {
+    const res = await fetch(target, {
       method: "GET",
-      credentials: "include", // 🔐 forward cookies
       headers: {
-        "Content-Type": "application/json",
-        // forward cookies explicitly (important for Node fetch)
+        accept: "application/json",
         cookie: request.headers.get("cookie") ?? "",
       },
       cache: "no-store",
     });
 
+    if (!res.headers.get("content-type")?.includes("application/json")) {
+      const text = await res.text();
+      return new NextResponse(text, { status: res.status });
+    }
+
     const data = await res.json();
-
-    return NextResponse.json(data, {
-      status: res.status,
-    });
+    return NextResponse.json(data, { status: res.status });
   } catch (err) {
-    console.error("❌ Products proxy error:", err);
-
-    return NextResponse.json(
-      { message: "Failed to fetch products" },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: "Proxy error", error: String(err) }, { status: 500 });
   }
 }

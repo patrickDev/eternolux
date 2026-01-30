@@ -47,9 +47,8 @@ export type AuthResponse = {
   message?: string;
 };
 
-type ProductsResponse = {
-  products: Product[];
-};
+
+type ProductsResponse = { products: Product[] };
 
 /* =======================
    API Slice
@@ -58,20 +57,33 @@ type ProductsResponse = {
 export const api = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
-    baseUrl: "/api", // ✅ consistent base
-    credentials: "include", // 🔐 HttpOnly cookies
+    baseUrl: "/api",
+    credentials: "include",
   }),
   tagTypes: ["Products", "User"],
   endpoints: (builder) => ({
-    /* ---------- PRODUCTS ---------- */
-
     getProducts: builder.query<Product[], string | void>({
       query: (search) => ({
         url: "/products",
         params: search ? { search } : undefined,
       }),
-      transformResponse: (response: ProductsResponse) => response.products,
+      transformResponse: (res: any) => (Array.isArray(res) ? res : res?.products ?? []),
       providesTags: ["Products"],
+    }),
+
+    // ✅ FIX: Standardized the response handling
+    getProductById: builder.query<Product | null, string>({
+      query: (productId) => ({
+        url: "/products",
+        params: { productId },
+      }),
+      transformResponse: (response: any) => {
+        // Handle { products: [obj] } OR [obj] OR direct obj
+        if (response?.products) return response.products[0] || null;
+        if (Array.isArray(response)) return response[0] || null;
+        return response || null;
+      },
+      providesTags: (result, error, productId) => [{ type: "Products", id: productId }],
     }),
 
     /* ---------- AUTH ---------- */
@@ -145,12 +157,11 @@ export const api = createApi({
 export const {
   useGetProductsQuery,
   useLazyGetProductsQuery,
-
+  useGetProductByIdQuery, // ✅ export hook
   useRegisterMutation,
   useSigninMutation,
   useMeQuery,
   useLogoutMutation,
-
   useSendResetCodeMutation,
   useResetPasswordMutation,
 } = api;

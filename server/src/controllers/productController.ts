@@ -1,34 +1,49 @@
 import { Request, Response } from "express";
-import { sql } from "drizzle-orm";
-
+import { sql, eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { products } from "../db/schema";
 
-export const getProducts = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const getProducts = async (req: Request, res: Response): Promise<void> => {
   try {
-    const search = (req.query.search as string | undefined)?.trim() ?? "";
+    const searchRaw = req.query.search;
+    const productIdRaw = req.query.productId;
 
-    let result;
+    const search =
+      typeof searchRaw === "string" ? searchRaw.trim() : undefined;
 
-    if (!search) {
-      // No search → return all products
-      result = await db.select().from(products);
-    } else {
-      // SQLite case-insensitive search
-      result = await db
+    const productId =
+      typeof productIdRaw === "string"
+        ? decodeURIComponent(productIdRaw).trim()
+        : undefined;
+
+    // ✅ detail page use-case: /api/products?productId=<uuid>
+    if (productId) {
+      const rows = await db
         .select()
         .from(products)
-        .where(
-          sql`lower(${products.name}) LIKE '%' || lower(${search}) || '%'`
-        );
+        .where(eq(products.productId, productId));
+
+      // keep same shape your frontend expects
+      res.json({ products: rows });
+      return;
     }
 
-    res.json({ products: result });
+    // ✅ list/search: /api/products?search=term
+    if (search) {
+      const rows = await db
+        .select()
+        .from(products)
+        .where(sql`lower(${products.name}) LIKE '%' || lower(${search}) || '%'`);
+
+      res.json({ products: rows });
+      return;
+    }
+
+    // ✅ list all
+    const rows = await db.select().from(products);
+    res.json({ products: rows });
   } catch (error) {
-    console.error("Search products error:", error);
-    res.status(500).json({ message: "Error searching products" });
+    console.error("❌ getProducts error:", error);
+    res.status(500).json({ message: "Error fetching products" });
   }
 };

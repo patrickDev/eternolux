@@ -36,6 +36,7 @@ app.get("/health", (_req, res) => {
 
 
 const port = Number(process.env.SERVER_PORT || 4000);
-app.listen(port, "0.0.0.0");
-
+app.listen(port, () => {
+  console.log(`Server is running on => ${process.env.NEXT_PUBLIC_BACKEND_URL}`);
+});
 
