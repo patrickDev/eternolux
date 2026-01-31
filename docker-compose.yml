@@ -7,10 +7,6 @@ services:
       - "4000:4000"
     env_file:
       - ./server/.env
-    environment:
-      NODE_ENV: production
-      PORT: 4000
-      SERVER_PORT: 4000
     restart: unless-stopped
 
   client:
@@ -18,12 +14,12 @@ services:
       context: ./client
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_BACKEND_URL: http://server:4000
+        # Resolves from a .env file in the project root
+        NEXT_PUBLIC_BACKEND_URL: ${BACKEND_URL}
     ports:
       - "3000:3000"
     environment:
-      NODE_ENV: production
-      NEXT_PUBLIC_BACKEND_URL: http://server:4000
+      - NEXT_PUBLIC_BACKEND_URL=${BACKEND_URL}
     depends_on:
       - server
     restart: unless-stopped
