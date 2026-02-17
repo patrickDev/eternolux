@@ -1,0 +1,18 @@
+[
+  {
+    "orderSummaryId": "d3e1c8a2-4b9f-4f0e-a1b3-2f6c7d8e9f01",
+    "userId": "3f7a3be4-8a61-4cfb-a29f-281d0eac34b7",
+    "totalOrders": 1,
+    "totalSpent": 75.98,
+    "lastOrderDate": "2025-10-01T14:30:00.000Z",
+    "createdAt": "2025-10-14T12:00:00.000Z"
+  },
+  {
+    "orderSummaryId": "f4a9d1c7-6e3b-4b8a-92c1-3e5f7d8b0a12",
+    "userId": "9c0ca8b1-9e8b-4b7b-86b7-cbb1a84d8c11",
+    "totalOrders": 1,
+    "totalSpent": 19.99,
+    "lastOrderDate": "2025-10-03T11:15:00.000Z",
+    "createdAt": "2025-10-14T12:00:00.000Z"
+  }
+]

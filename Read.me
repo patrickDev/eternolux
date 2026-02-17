@@ -1,0 +1,56 @@
+# 1. Save your buggy work on a feature branch
+git checkout dev
+git checkout -b feature/fix-bugs
+
+# 2. Commit your local changes
+git add .
+git commit -m "WIP: Fixing bugs"
+git push -u origin feature/fix-bugs
+
+# 3. When bugs are fixed and tested locally
+# Merge to dev
+git checkout dev
+git merge feature/fix-bugs
+git push origin dev
+# ✅ This will auto-deploy to dev-api.eternolux.com (via CI/CD)
+
+# 4. Test on dev, then when ready, merge to staging
+git checkout staging
+git merge dev
+git push origin staging
+# ✅ This will auto-deploy to staging-api.eternolux.com
+
+# 5. Test on staging, then when approved, merge to main
+git checkout main
+git merge staging
+git push origin main
+# ✅ This will auto-deploy to api.eternolux.com (production)
+
+
+
+Now Deploy Each Environment
+bash# Deploy staging (from staging branch)
+git checkout staging
+npx wrangler deploy --env staging
+
+# Deploy dev (from dev branch)
+git checkout dev
+npx wrangler deploy --env dev
+
+# Verify production is still working (from main)
+git checkout main
+npx wrangler deploy --env production
+
+
+
+----- Cloudflare ---
+#deploy dev worker
+git checkout dev
+npx wrangler deploy --env dev
+
+git checkout staging
+npx wrangler deploy --env staging
+
+git checkout main
+npx wrangler deploy --env prod
+

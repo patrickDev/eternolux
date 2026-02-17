@@ -1,0 +1,26 @@
+[
+  {
+    "totalRevenue": 5432.75,
+    "totalOrders": 48,
+    "totalProductsSold": 126,
+    "startDate": "2025-10-01T00:00:00.000Z",
+    "endDate": "2025-10-07T23:59:59.000Z",
+    "createdAt": "2025-10-08T00:00:00.000Z"
+  },
+  {
+    "totalRevenue": 6289.40,
+    "totalOrders": 55,
+    "totalProductsSold": 143,
+    "startDate": "2025-10-08T00:00:00.000Z",
+    "endDate": "2025-10-14T23:59:59.000Z",
+    "createdAt": "2025-10-15T00:00:00.000Z"
+  },
+  {
+    "totalRevenue": 7120.10,
+    "totalOrders": 62,
+    "totalProductsSold": 158,
+    "startDate": "2025-10-15T00:00:00.000Z",
+    "endDate": "2025-10-21T23:59:59.000Z",
+    "createdAt": "2025-10-22T00:00:00.000Z"
+  }
+]
