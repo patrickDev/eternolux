@@ -1,25 +1,22 @@
 // src/app/components/Navbar.tsx
+
 "use client";
 
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { ShoppingBag, Heart, Menu } from "lucide-react";
+import { ShoppingBag, User, Heart, Menu, Search, MapPin } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { useWishlist } from "@/contexts/WishlistContext";
 import SearchBar from "./SearchBar";
-import ProfileDropdown from "./ProfileDropdown";
-import LoginModal from "./LoginModal";
-import RegisterModal from "./RegisterModal";
 
 export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
   const { cartTotalCount } = useCart();
-  const { wishlistCount } = useWishlist();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [loginOpen,      setLoginOpen]      = useState(false);
-  const [registerOpen,   setRegisterOpen]   = useState(false);
+  const { wishlistCount } = useWishlist();
+  
 
   const deals = [
     { text: "Up to 60% off", highlight: "Presidents' Day deals" },
@@ -39,16 +36,6 @@ export default function Navbar() {
   ];
 
   const isActive = (path: string) => pathname === path;
-
-  const handleSwitchToRegister = () => {
-    setLoginOpen(false);
-    setRegisterOpen(true);
-  };
-
-  const handleSwitchToLogin = () => {
-    setRegisterOpen(false);
-    setLoginOpen(true);
-  };
 
   return (
     <>
@@ -96,46 +83,49 @@ export default function Navbar() {
                     letterSpacing: '-0.03em',
                   }}
                 >
-                  <span className="text-red-600 group-hover:text-black transition-colors duration-300">
+                       <span className="text-black group-hover:text-red-600 transition-colors duration-300">
+                 
                     Eterno
                   </span>
-                  <span className="text-black group-hover:text-red-600 transition-colors duration-300">
+                   <span className="text-red-600 group-hover:text-black transition-colors duration-300">
                     LUX
                   </span>
                 </div>
               </div>
             </Link>
 
-            {/* ── SEARCH BAR (DESKTOP) ── */}
+            {/* ── SEARCH BAR ── */}
             <div className="hidden md:flex flex-1 max-w-xl mx-6">
-              <SearchBar />
+              <div className="relative w-full">
+                <Search
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+                  size={18}
+                />
+                <SearchBar />
+              </div>
             </div>
 
             {/* ── RIGHT ICONS ── */}
             <div className="flex items-center gap-5">
 
-              {/* Profile Dropdown (Desktop) */}
-              <div className="hidden md:block">
-                <ProfileDropdown
-                  onOpenLogin={() => setLoginOpen(true)}
-                  onOpenRegister={() => setRegisterOpen(true)}
-                />
-              </div>
+              {/* Profile */}
+              <button
+                onClick={() => router.push("/profile")}
+                className="hidden md:flex flex-col items-center gap-0.5 text-gray-700 hover:text-red-600 transition-colors group"
+              >
+                <User size={22} strokeWidth={1.5} />
+                <span className="text-[10px] font-semibold tracking-wide">Account</span>
+              </button>
 
               {/* Wishlist */}
               <button
-                onClick={() => router.push("/wishlist")}
-                className="hidden md:flex flex-col items-center gap-0.5 text-gray-700 hover:text-red-600 transition-colors relative"
-              >
-                <div className="relative">
-                  <Heart size={22} strokeWidth={1.5} />
-                  {wishlistCount > 0 && (
-                    <span className="absolute -top-2 -right-2 w-5 h-5 bg-red-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow">
-                      {wishlistCount > 9 ? "9+" : wishlistCount}
-                    </span>
-                  )}
-                </div>
-                <span className="text-[10px] font-semibold tracking-wide">Wishlist</span>
+                onClick={() => router.push("/wishlist")}>
+                 <div className="relative">
+                     <Heart size={22} />
+                      {wishlistCount > 0 && (
+                       <span className="badge">{wishlistCount > 9 ? "9+" : wishlistCount}</span>
+                    )}
+                 </div>
               </button>
 
               {/* Cart */}
@@ -205,10 +195,13 @@ export default function Navbar() {
         {/* ── MOBILE MENU ── */}
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-gray-100 bg-white px-6 py-4 space-y-1 shadow-lg">
-            
             {/* Mobile Search */}
-            <div className="mb-4">
-              <SearchBar />
+            <div className="relative mb-4">
+              <Search
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+                size={18}
+              />
+                <SearchBar />
             </div>
 
             {/* Shop All */}
@@ -237,39 +230,21 @@ export default function Navbar() {
             {/* Mobile Bottom Links */}
             <div className="flex gap-6 pt-4 mt-2 border-t border-gray-100">
               <button
-                onClick={() => { setMobileMenuOpen(false); setLoginOpen(true); }}
-                className="text-sm font-bold text-gray-700 hover:text-red-600"
+                onClick={() => { setMobileMenuOpen(false); router.push("/profile"); }}
+                className="flex items-center gap-2 text-sm text-gray-700 hover:text-red-600"
               >
-                Sign In
+                <User size={18} /> Account
               </button>
               <button
                 onClick={() => { setMobileMenuOpen(false); router.push("/wishlist"); }}
-                className="flex items-center gap-2 text-sm text-gray-700 hover:text-red-600 relative"
+                className="flex items-center gap-2 text-sm text-gray-700 hover:text-red-600"
               >
-                <Heart size={18} />
-                Wishlist
-                {wishlistCount > 0 && (
-                  <span className="ml-1 w-5 h-5 bg-red-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                    {wishlistCount}
-                  </span>
-                )}
+                <Heart size={18} /> Wishlist
               </button>
             </div>
           </div>
         )}
       </header>
-
-      {/* ── MODALS ─────────────────────────────────────────── */}
-      <LoginModal
-        isOpen={loginOpen}
-        onClose={() => setLoginOpen(false)}
-        onSwitchToRegister={handleSwitchToRegister}
-      />
-      <RegisterModal
-        isOpen={registerOpen}
-        onClose={() => setRegisterOpen(false)}
-        onSwitchToLogin={handleSwitchToLogin}
-      />
     </>
   );
 }

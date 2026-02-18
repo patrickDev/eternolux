@@ -42,6 +42,14 @@ export const api = createApi({
       providesTags: (_r, _e, id) => [{ type: "Product", id }],
     }),
 
+       getFeaturedProducts: builder.query<Product[], void>({
+      query: () => "/api/products/featured",
+      transformResponse: (raw: any) => {
+        const list = raw?.products || raw?.data || raw;
+        return Array.isArray(list) ? list.map(normalizeProduct) : [];
+      },
+    }),
+
     // ── SEARCH ───────────────────────────────────────────────
     // GET /api/search?search=query&category=...&minPrice=...&maxPrice=...
     searchProducts: builder.query<Product[], {
@@ -101,7 +109,9 @@ export const api = createApi({
       invalidatesTags: ["Wishlist"],
     }),
 
-    // ── PROFILE ──────────────────────────────────────────────
+   /* ═══════════════════════════════════════════════════════
+       PROFILE
+    ═══════════════════════════════════════════════════════ */ 
     // GET /api/users/:userId
     getProfile: builder.query<any, string>({
       query: (userId) => `/api/users/${userId}`,
@@ -139,7 +149,17 @@ export const api = createApi({
       transformResponse: (raw: any) => raw?.orders || raw?.data || raw || [],
       providesTags: ["Orders"],
     }),
+      createOrder: builder.mutation<any, any>({
+      query: (orderData) => ({
+        url: "/api/orders",
+        method: "POST",
+        body: orderData,
+      }),
+      invalidatesTags: ["Orders"],
+    }),
+
   }),
+
 });
 
 // ─────────────────────────────────────────────────────────────
@@ -148,10 +168,6 @@ export const api = createApi({
 function fixImageUrl(url: string | null | undefined): string | null {
   if (!url || url.trim() === "") return null;
   if (url.includes("images.eternolux.com")) return url;
-  if (url.includes("images.unsplash.com")) {
-    const base = url.split("?")[0];
-    return `${base}?w=800&q=80&fm=webp&fit=crop&auto=format`;
-  }
   return url;
 }
 
@@ -212,14 +228,25 @@ function normalizeProduct(p: any): Product {
 }
 
 export const {
+  //Products
   useGetProductsQuery,
   useGetProductByIdQuery,
+  useGetFeaturedProductsQuery,
+
+  //Search
   useSearchProductsQuery,
+
+  //Wishlist
   useGetWishlistQuery,
   useAddToWishlistMutation,
   useRemoveFromWishlistMutation,
+
+  //Profile
   useGetProfileQuery,
   useUpdateProfileMutation,
   useChangePasswordMutation,
+
+  //Orders
   useGetOrdersQuery,
+  useCreateOrderMutation,
 } = api;

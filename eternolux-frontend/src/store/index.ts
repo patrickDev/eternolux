@@ -1,6 +1,6 @@
 // src/store/index.ts
-
 import { configureStore } from "@reduxjs/toolkit";
+import { setupListeners } from "@reduxjs/toolkit/query";
 import { api } from "./api";
 
 export const store = configureStore({
@@ -11,5 +11,9 @@ export const store = configureStore({
     getDefaultMiddleware().concat(api.middleware),
 });
 
-export type RootState   = ReturnType<typeof store.getState>;
+// Enable refetchOnFocus/refetchOnReconnect behaviors
+setupListeners(store.dispatch);
+
+// Infer types from store
+export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
