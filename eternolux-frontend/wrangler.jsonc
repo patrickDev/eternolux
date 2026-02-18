@@ -1,0 +1,27 @@
+{
+  "name": "eternolux-frontend",
+  "main": ".open-next/worker.js",
+  "workers_dev": false, 
+  "routes": [
+     "eternolux.com/*" ,
+    "www.eternolux.com/*" 
+  ],
+  "r2_buckets": [
+    {
+      "binding": "NEXT_INC_CACHE_R2_BUCKET",
+      "bucket_name": "eternolux-cache"
+    }
+  ],
+  "compatibility_date": "2026-02-07",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"], 
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS",
+    "html_handling": "none" 
+  },
+  "vars": {
+    "NEXT_PUBLIC_BACKEND_URL": "https://api.eternolux.com",
+    "BACKEND_URL": "https://api.eternolux.com",
+    "NODE_ENV": "production"
+  }
+}
