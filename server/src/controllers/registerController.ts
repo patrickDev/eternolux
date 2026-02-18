@@ -1,4 +1,4 @@
-// controllers/registerController.ts
+// controllers/registerController.ts (BACKEND - UPDATED)
 import { Request, Response } from "express";
 import { eq } from "drizzle-orm";
 import { getDb } from "../db/client";
@@ -19,7 +19,7 @@ export const register = async (req: Request, res: Response) => {
     if (!email || !password || !firstName || !lastName || !phone) {
       return res.status(400).json({
         success: false,
-        message: "Missing required fields",
+        message: "All fields are required",
         code: "MISSING_FIELDS",
         required: ["email", "password", "firstName", "lastName", "phone"]
       });
@@ -95,15 +95,15 @@ export const register = async (req: Request, res: Response) => {
       lastLoginAt: new Date().toISOString(),
     }).returning();
     
-    // 8. Create session
+    // 8. Create session in database
     const session = await createSession(newUser.userId, env, {
       userAgent: req.headers["user-agent"],
       ipAddress: req.ip || req.socket.remoteAddress,
       expiresInDays: 7,
     });
     
-    // 9. Set session cookie
-    setSessionCookie(res, session.sessionId);
+    // 9. Set session cookie (use token, not sessionId)
+    setSessionCookie(res, session.token);
     
     // 10. Log registration
     console.log(`✅ New user registered: ${newUser.email} (${newUser.userId})`);

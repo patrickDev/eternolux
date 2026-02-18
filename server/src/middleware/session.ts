@@ -34,6 +34,8 @@ export async function createSession(
     expiresAt: expiresAt.toISOString(),
   }).returning();
   
+  console.log(`✅ Session created in DB: ${session.sessionId} for user ${userId}`);
+  
   return {
     sessionId: session.sessionId,
     token: session.token,
@@ -44,7 +46,7 @@ export async function createSession(
 /**
  * Get session by ID
  */
-export async function getSession(sessionId: string, env: any) {
+export async function getSessionData(sessionId: string, env: any) {
   const db = getDb(env);
   
   const [session] = await db
@@ -67,6 +69,8 @@ export async function deleteSession(
   
   await db.delete(sessions)
     .where(eq(sessions.sessionId, sessionId));
+  
+  console.log(`✅ Session deleted from DB: ${sessionId}`);
 }
 
 /**
@@ -80,6 +84,8 @@ export async function deleteAllUserSessions(
   
   await db.delete(sessions)
     .where(eq(sessions.userId, userId));
+  
+  console.log(`✅ All sessions deleted for user: ${userId}`);
 }
 
 /**
@@ -113,6 +119,8 @@ export async function extendSession(
     .update(sessions)
     .set({ expiresAt: expiresAt.toISOString() })
     .where(eq(sessions.sessionId, sessionId));
+  
+  console.log(`✅ Session extended: ${sessionId}`);
 }
 
 /**
@@ -126,7 +134,12 @@ export async function cleanupExpiredSessions(env: any): Promise<number> {
     .delete(sessions)
     .where(lt(sessions.expiresAt, now));
   
-  return result.rowsAffected || 0;
+  const count = result.rowsAffected || 0;
+  if (count > 0) {
+    console.log(`🧹 Cleaned up ${count} expired sessions from DB`);
+  }
+  
+  return count;
 }
 
 /**
@@ -136,7 +149,7 @@ export async function validateSession(
   sessionId: string,
   env: any
 ): Promise<boolean> {
-  const session = await getSession(sessionId, env);
+  const session = await getSessionData(sessionId, env);
   
   if (!session) return false;
   
