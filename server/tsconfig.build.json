@@ -5,15 +5,25 @@
     "outDir": "dist",
     "rootDir": "src",
 
-    "module": "CommonJS",
-    "moduleResolution": "Node",
+    // 1. CHANGE: Match the modern resolution from your base config
+    "module": "ESNext", 
+    "moduleResolution": "Bundler", 
+
+    "types": [
+      "@cloudflare/workers-types", 
+      "node" 
+    ],
 
     "target": "ES2022",
-    "lib": ["ES2022"],
+    "lib": ["ES2022", "DOM"],
 
     "declaration": false,
     "sourceMap": true
   },
-  "include": ["src/**/*.ts"],
+   "include": [
+    "src/**/*",
+    "worker-configuration.d.ts",
+    "../env.d.ts" 
+  ],
   "exclude": ["node_modules", "dist", "**/*.test.ts"]
 }

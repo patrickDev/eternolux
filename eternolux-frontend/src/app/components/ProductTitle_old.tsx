@@ -22,7 +22,6 @@ const ProductTile: React.FC<ProductTileProps> = ({ product }) => {
   const [clickCount, setClickCount] = useState(0);
   const [showingCount, setShowingCount] = useState(false);
 
-  // Fixed: Use ?? consistently for all originalPrice references
   const discount =
     (product?.originalPrice ?? 0) > (product?.price ?? 0)
       ? Math.round(
@@ -200,4 +199,5 @@ const ProductTile: React.FC<ProductTileProps> = ({ product }) => {
   );
 };
 
+// Export as default
 export default ProductTile;

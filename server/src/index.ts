@@ -1,17 +1,29 @@
 // src/index.ts (ROOT - BACKEND)
+// COMPLETE VERSION - All existing routes + Payments + Customer address
+
 import { httpServerHandler } from "cloudflare:node";
 import { env } from "cloudflare:workers";
 import express, { Request, Response, NextFunction } from "express";
 import cookieParser from "cookie-parser";
 
-// Routes
+// ══════════════════════════════════════════════════════════════
+// EXISTING ROUTES (KEEP ALL OF THESE)
+// ══════════════════════════════════════════════════════════════
 import authRoutes from "./routes/authRoutes";
 import userRoutes from "./routes/userRoutes";
 import productRoutes from "./routes/productRoutes";
 import searchRoutes from "./routes/searchRoutes";
 import registerRoutes from "./routes/registerRoutes";
 
-// Security middleware
+// ══════════════════════════════════════════════════════════════
+// NEW ROUTES (PAYMENTS & CUSTOMERS)
+// ══════════════════════════════════════════════════════════════
+import paymentRoutes from "./routes/paymentRoutes";
+//import customerRoutes from "./routes/customerRoutes";
+
+// ══════════════════════════════════════════════════════════════
+// EXISTING SECURITY MIDDLEWARE (KEEP ALL)
+// ══════════════════════════════════════════════════════════════
 import { applySecurityMiddleware, securityErrorHandler } from "./middleware/security";
 import { authLimiter, userLimiter, productLimiter } from "./middleware/rateLimiter";
 
@@ -19,19 +31,14 @@ const app = express();
 const PORT = 8080;
 
 /* ==========================================================================
-   1. INJECT CLOUDFLARE ENV → process.env (MUST BE ABSOLUTE FIRST)
-
-   Cloudflare Workers vars live in the `env` object from wrangler.json,
-   NOT in process.env. We copy them here so middleware can use process.env.
-   
-   ⚠️  Do NOT assign process.env.NODE_ENV — esbuild treats it as a
-       compile-time constant and will throw "assign-to-define" warning.
+   1. INJECT CLOUDFLARE ENV → process.env (KEEP AS-IS)
    ========================================================================== */
 const cfEnv = env as any;
 
 // ✅ Safe to assign — these are NOT compile-time constants
 if (cfEnv.CORS_ORIGIN)        process.env.CORS_ORIGIN        = cfEnv.CORS_ORIGIN;
 if (cfEnv.TURSO_DATABASE_URL) process.env.TURSO_DATABASE_URL = cfEnv.TURSO_DATABASE_URL;
+if (cfEnv.TURSO_AUTH_TOKEN)   process.env.TURSO_AUTH_TOKEN   = cfEnv.TURSO_AUTH_TOKEN;
 
 // Use a custom key for env name (avoids the NODE_ENV constant issue)
 if (cfEnv.NODE_ENV) process.env.APP_ENV = cfEnv.NODE_ENV;
@@ -43,8 +50,7 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
 });
 
 /* ==========================================================================
-   2. SECURITY MIDDLEWARE (CORS, Helmet, body parser, sanitization)
-   Must be BEFORE routes.
+   2. SECURITY MIDDLEWARE (KEEP AS-IS)
    ========================================================================== */
 applySecurityMiddleware(app);
 
@@ -52,7 +58,7 @@ applySecurityMiddleware(app);
 app.use(cookieParser());
 
 /* ==========================================================================
-   3. LOGGING
+   3. LOGGING (KEEP AS-IS)
    ========================================================================== */
 app.use((req: Request, res: Response, next: NextFunction) => {
   const start = performance.now();
@@ -68,6 +74,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
    4. ROUTES
    ========================================================================== */
 
+// Health check
 app.get("/health", (_req, res) => {
   res.status(200).json({
     status: "active",
@@ -79,15 +86,25 @@ app.get("/health", (_req, res) => {
   });
 });
 
+// ══════════════════════════════════════════════════════════════
+// EXISTING ROUTES (KEEP ALL - DON'T REMOVE ANY)
+// ══════════════════════════════════════════════════════════════
 app.use("/api/auth",     authLimiter,    authRoutes);
 app.use("/api/products", productLimiter, productRoutes);
 app.use("/api/search",   productLimiter, searchRoutes);
 app.use("/api/users",    userLimiter,    userRoutes);
 app.use("/api/register", authLimiter,    registerRoutes);
 
+// ══════════════════════════════════════════════════════════════
+// NEW ROUTES (PAYMENTS & CUSTOMERS) - ADD THESE
+// ══════════════════════════════════════════════════════════════
+app.use("/api/payments",  paymentRoutes);   // Stripe + Amazon Pay
+//app.use("/api/customers", customerRoutes);  // Customer address saving
+
 /* ==========================================================================
-   5. 404 HANDLER
+   5. 404 HANDLER (KEEP AS-IS)
    ========================================================================== */
+   
 app.use((req: Request, res: Response) => {
   res.status(404).json({
     success: false,
@@ -97,7 +114,7 @@ app.use((req: Request, res: Response) => {
 });
 
 /* ==========================================================================
-   6. ERROR HANDLERS (MUST BE LAST)
+   6. ERROR HANDLERS (KEEP AS-IS - MUST BE LAST)
    ========================================================================== */
 app.use(securityErrorHandler);
 

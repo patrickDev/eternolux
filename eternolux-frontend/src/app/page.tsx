@@ -3,15 +3,17 @@
 
 import React, { useMemo } from "react";
 import Link from "next/link";
-import { ArrowRight, Star, Sparkles, Gift } from "lucide-react";
+import { ArrowRight, Star, Sparkles, Gift, Eye, TrendingUp, Heart } from "lucide-react";
 import HeroSlideshow from "@/app/components/HeroSlideshow";
 import ProductTile from "@/app/components/ProductTitle";
 import { useGetProductsQuery } from "@/store/api";
+import { useRecentlyViewed } from "@/contexts/RecentlyViewedContext";
 
 const FONT = '"Helvetica Neue", Helvetica, Arial, sans-serif';
 
 export default function LandingPage() {
   const { data: products, isLoading } = useGetProductsQuery();
+  const { recentlyViewed } = useRecentlyViewed();
 
   // Featured products
   const featuredProducts = useMemo(() => {
@@ -29,6 +31,30 @@ export default function LandingPage() {
   const bestSellers = useMemo(() => {
     if (!products) return [];
     return products.filter(p => (p.rating ?? 0) >= 4.5).slice(0, 10);
+  }, [products]);
+
+  // You Might Like - Random selection excluding recently viewed
+  const mightLike = useMemo(() => {
+    if (!products) return [];
+    const recentlyViewedIds = recentlyViewed.map(p => p.productId);
+    const available = products.filter(p => !recentlyViewedIds.includes(p.productId));
+    // Shuffle and take 10
+    const shuffled = [...available].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, 10);
+  }, [products, recentlyViewed]);
+
+  // Trending Near You - High rated products
+  const trending = useMemo(() => {
+    if (!products) return [];
+    // Products with rating >= 4.0, sorted by rating and review count
+    return [...products]
+      .filter(p => (p.rating ?? 0 )>= 4.0)  
+      .sort((a, b) => {
+        // Sort by rating first, then by review count
+        if (b.rating !== a.rating) return (b.rating ?? 0) - (a.rating ?? 0);
+        return (b.reviewCount || 0) - (a.reviewCount || 0);
+      })
+      .slice(0, 10);
   }, [products]);
 
   return (
@@ -60,9 +86,34 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ── RECENTLY VIEWED ─────────────────────────────── */}
+      {recentlyViewed.length > 0 && (
+        <section className="py-16 bg-white">
+          <div className="container mx-auto px-6">
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center gap-3">
+                <Eye size={32} className="text-red-600" />
+                <div>
+                  <h2 className="text-3xl md:text-4xl font-black text-gray-900">
+                    Recently Viewed
+                  </h2>
+                  <p className="text-gray-600">Pick up where you left off</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-5">
+              {recentlyViewed.map((product) => (
+                <ProductTile key={product.productId} product={product} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* ── FEATURED PRODUCTS ───────────────────────────── */}
       {featuredProducts.length > 0 && (
-        <section className="py-16">
+        <section className="py-16 bg-gray-50">
           <div className="container mx-auto px-6">
             <div className="flex items-center justify-between mb-8">
               <div>
@@ -99,6 +150,35 @@ export default function LandingPage() {
                 <ArrowRight size={20} />
               </Link>
             </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── YOU MIGHT LIKE ──────────────────────────────── */}
+      {mightLike.length > 0 && (
+        <section className="py-16 bg-white">
+          <div className="container mx-auto px-6">
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center gap-3">
+                <Heart size={32} className="text-red-600" />
+                <div>
+                  <h2 className="text-3xl md:text-4xl font-black text-gray-900">
+                    You Might Like
+                  </h2>
+                  <p className="text-gray-600">Handpicked just for you</p>
+                </div>
+              </div>
+            </div>
+
+            {isLoading ? (
+              <ProductGridSkeleton />
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-5">
+                {mightLike.map((product) => (
+                  <ProductTile key={product.productId} product={product} />
+                ))}
+              </div>
+            )}
           </div>
         </section>
       )}
@@ -146,9 +226,38 @@ export default function LandingPage() {
         </section>
       )}
 
+      {/* ── TRENDING NEAR YOU ───────────────────────────── */}
+      {trending.length > 0 && (
+        <section className="py-16 bg-white">
+          <div className="container mx-auto px-6">
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center gap-3">
+                <TrendingUp size={32} className="text-red-600" />
+                <div>
+                  <h2 className="text-3xl md:text-4xl font-black text-gray-900">
+                    Trending Near You
+                  </h2>
+                  <p className="text-gray-600">Popular in San Antonio, Texas</p>
+                </div>
+              </div>
+            </div>
+
+            {isLoading ? (
+              <ProductGridSkeleton />
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-5">
+                {trending.map((product) => (
+                  <ProductTile key={product.productId} product={product} />
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
       {/* ── BEST SELLERS ────────────────────────────────── */}
       {bestSellers.length > 0 && (
-        <section className="py-16">
+        <section className="py-16 bg-gray-50">
           <div className="container mx-auto px-6">
             <div className="flex items-center justify-between mb-8">
               <div>

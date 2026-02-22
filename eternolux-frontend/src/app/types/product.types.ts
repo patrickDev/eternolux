@@ -11,32 +11,33 @@ export interface Product {
 
   // ── Basic Info ────────────────────────────────────────────
   name:               string;
-  description:        string | null;
+  description:        string;
   sku:                string;
-  brand:              string | null;
+  brand:              string ;
   category:           string;
-  tags:               string[] | null;               // JSON array
+  tags:               string[];               // JSON array
 
   // ── Pricing ───────────────────────────────────────────────
   price:              number;
-  originalPrice:      number | null;                 // original_price
-  costPrice:          number | null;                 // cost_price (not shown to customers)
+  originalPrice?:      number ;                 // original_price
+  costPrice:          number;                 // cost_price (not shown to customers)
 
-  // ── Inventory ─────────────────────────────────────────────
+
+ // ── Inventory ─────────────────────────────────────────────
   stock:              number;
   lowStockThreshold:  number | null;                 // low_stock_threshold (default 10)
 
   // ── Media ─────────────────────────────────────────────────
-  imageUrl:           string | null;                 // image_url
-  images:             string[] | null;               // JSON array of extra image URLs
+  imageUrl:           string;                 // image_url
+  images?:             string[] ;               // JSON array of extra image URLs
 
   // ── Physical ──────────────────────────────────────────────
   weight:             number | null;
   dimensions:         ProductDimensions | null;      // JSON object
 
   // ── Ratings & Reviews ─────────────────────────────────────
-  rating:             number | null;
-  reviewCount:        number | null;                 // review_count (default 0)
+  rating:             number ;
+  reviewCount:        number ;                 // review_count (default 0)
 
   // ── Seller ────────────────────────────────────────────────
   sellerId:           string | null;                 // seller_id → FK users.userId
@@ -51,8 +52,8 @@ export interface Product {
   metaDescription:    string | null;                 // meta_description
 
   // ── Analytics ─────────────────────────────────────────────
-  views:              number | null;                 // default 0
-  purchases:          number | null;                 // default 0
+  views:              number ;                 // default 0
+  purchases:          number;                 // default 0
 
   // ── Timestamps ────────────────────────────────────────────
   createdAt:          string;                        // created_at  ISO string

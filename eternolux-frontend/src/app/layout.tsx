@@ -5,6 +5,7 @@ import { Providers }        from "./providers";
 import { AuthProvider }     from "@/contexts/AuthContext";
 import { CartProvider }     from "@/contexts/CartContext";
 import { WishlistProvider } from "@/contexts/WishlistContext";
+import { RecentlyViewedProvider } from "@/contexts/RecentlyViewedContext";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 
@@ -25,9 +26,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <AuthProvider>
             <CartProvider>
               <WishlistProvider>
-                <Navbar />
-                <main>{children}</main>
-                <Footer />
+                <RecentlyViewedProvider>
+                  <Navbar />
+                  <main>{children}</main>
+                  <Footer />
+                </RecentlyViewedProvider>
               </WishlistProvider>
             </CartProvider>
           </AuthProvider>

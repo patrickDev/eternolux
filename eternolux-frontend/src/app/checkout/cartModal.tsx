@@ -66,7 +66,7 @@ const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose, product }) => {
   const getImage = (item: any): string => {
     if (item.imageUrl) return item.imageUrl;
     if (item.images?.[0]) return item.images[0];
-    return "/placeholder-product.jpg";
+    return "/placeholder.png";
   };
 
   const handleCheckout = () => {
@@ -154,7 +154,7 @@ const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose, product }) => {
                       fill
                       className="object-contain p-2 group-hover:scale-105 transition-transform duration-300"
                       sizes="96px"
-                      onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder-product.jpg"; }}
+                      onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder.png"; }}
                     />
                   </div>
 

@@ -21,7 +21,8 @@
   },
   "include": [
     "src/**/*",
-   "worker-configuration.d.ts"
-, "env.d.ts"  ],
+   "worker-configuration.d.ts",
+   "types/**/*",
+   "env.d.ts"  ],
   "exclude": ["node_modules", ".next", "dist"]
 }

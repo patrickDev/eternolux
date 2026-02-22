@@ -1,4 +1,5 @@
-// env.d.ts (ROOT - move here from src/types/)
+// env.d.ts (ROOT)
+// Environment variables and general type declarations
 
 export interface Env {
   // Server
@@ -21,6 +22,19 @@ export interface Env {
   // Optional
   JWT_SECRET?: string;
   API_KEY?: string;
+  
+  // Stripe
+  STRIPE_SECRET_KEY?: string;
+  STRIPE_WEBHOOK_SECRET?: string;
+  
+  // Amazon Pay
+  AMAZON_PAY_PUBLIC_KEY_ID?: string;
+  AMAZON_PAY_PRIVATE_KEY?: string;
+  AMAZON_PAY_STORE_ID?: string;
+  AMAZON_PAY_WEBHOOK_PUBLIC_KEY?: string;
+  
+  // Frontend
+  FRONTEND_URL?: string;
 }
 
 // Cloudflare Workers module
@@ -33,7 +47,7 @@ declare module "cloudflare:node" {
   export function httpServerHandler(options: { port: number }): any;
 }
 
-// Express request extension
+// Global request extension
 declare global {
   namespace Express {
     interface Request {

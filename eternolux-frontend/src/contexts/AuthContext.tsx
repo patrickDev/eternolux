@@ -27,7 +27,7 @@ interface RegisterData {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api-wwd.eternolux.com";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.eternolux.com";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user,      setUser]      = useState<User | null>(null);

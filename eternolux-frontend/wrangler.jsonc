@@ -1,27 +1,95 @@
 {
   "name": "eternolux-frontend",
-  "main": ".open-next/worker.js",
-  "workers_dev": false, 
-  "routes": [
-     "eternolux.com/*" ,
-    "www.eternolux.com/*" 
-  ],
+  "main": ".open-next/server-functions/default/index.mjs",
+  "workers_dev": false,
+
+  "routes": ["eternolux.com/*", "www.eternolux.com/*"],
+
+  "compatibility_date": "2026-02-07",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS",
+    "html_handling": "none"
+  },
+
   "r2_buckets": [
     {
       "binding": "NEXT_INC_CACHE_R2_BUCKET",
       "bucket_name": "eternolux-cache"
     }
   ],
-  "compatibility_date": "2026-02-07",
-  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"], 
-  "assets": {
-    "directory": ".open-next/assets",
-    "binding": "ASSETS",
-    "html_handling": "none" 
-  },
+
   "vars": {
+    "NEXT_PUBLIC_API_URL": "https://api.eternolux.com",
     "NEXT_PUBLIC_BACKEND_URL": "https://api.eternolux.com",
     "BACKEND_URL": "https://api.eternolux.com",
     "NODE_ENV": "production"
+  },
+
+  "env": {
+    "dev": {
+      // IMPORTANT: r2_buckets not inherited
+      "r2_buckets": [
+        {
+          "binding": "NEXT_INC_CACHE_R2_BUCKET",
+          "bucket_name": "eternolux-cache"
+        }
+      ],
+      // Optional but safe: assets sometimes also behaves similarly
+      "assets": {
+        "directory": ".open-next/assets",
+        "binding": "ASSETS",
+        "html_handling": "none"
+      },
+      "vars": {
+        "NEXT_PUBLIC_API_URL": "https://api-wwd.eternolux.com",
+        "NEXT_PUBLIC_BACKEND_URL": "https://api-wwd.eternolux.com",
+        "BACKEND_URL": "https://api-wwd.eternolux.com",
+        "NODE_ENV": "development"
+      }
+    },
+
+    "staging": {
+      "r2_buckets": [
+        {
+          "binding": "NEXT_INC_CACHE_R2_BUCKET",
+          "bucket_name": "eternolux-cache"
+        }
+      ],
+      "assets": {
+        "directory": ".open-next/assets",
+        "binding": "ASSETS",
+        "html_handling": "none"
+      },
+      "vars": {
+        "NEXT_PUBLIC_API_URL": "https://api-wws.eternolux.com",
+        "NEXT_PUBLIC_BACKEND_URL": "https://api-wws.eternolux.com",
+        "BACKEND_URL": "https://api-wws.eternolux.com",
+        "NODE_ENV": "staging"
+      }
+    },
+
+    "prod": {
+      "r2_buckets": [
+        {
+          "binding": "NEXT_INC_CACHE_R2_BUCKET",
+          "bucket_name": "eternolux-cache"
+        }
+      ],
+      "assets": {
+        "directory": ".open-next/assets",
+        "binding": "ASSETS",
+        "html_handling": "none"
+      },
+      "routes": ["eternolux.com/*", "www.eternolux.com/*"],
+      "vars": {
+        "NEXT_PUBLIC_API_URL": "https://api.eternolux.com",
+        "NEXT_PUBLIC_BACKEND_URL": "https://api.eternolux.com",
+        "BACKEND_URL": "https://api.eternolux.com",
+        "NODE_ENV": "production"
+      }
+    }
   }
 }

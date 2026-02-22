@@ -8,7 +8,7 @@ import type {
 } from "@/app/types/product.types";
 
 const BACKEND_URL =
-  process.env.NEXT_PUBLIC_API_URL || "https://api-wwd.eternolux.com";
+  process.env.NEXT_PUBLIC_API_URL || "https://api.eternolux.com";
 
 export const api = createApi({
   reducerPath: "api",
@@ -22,7 +22,6 @@ export const api = createApi({
   }),
   tagTypes: ["Products", "Product", "Wishlist", "Profile", "Orders"],
   endpoints: (builder) => ({
-
     // ── PRODUCTS ─────────────────────────────────────────────
     getProducts: builder.query<Product[], void>({
       query: () => "/api/products",
@@ -42,7 +41,7 @@ export const api = createApi({
       providesTags: (_r, _e, id) => [{ type: "Product", id }],
     }),
 
-       getFeaturedProducts: builder.query<Product[], void>({
+    getFeaturedProducts: builder.query<Product[], void>({
       query: () => "/api/products/featured",
       transformResponse: (raw: any) => {
         const list = raw?.products || raw?.data || raw;
@@ -52,12 +51,10 @@ export const api = createApi({
 
     // ── SEARCH ───────────────────────────────────────────────
     // GET /api/search?search=query&category=...&minPrice=...&maxPrice=...
-    searchProducts: builder.query<Product[], {
-      search:    string;
-      category?: string;
-      minPrice?: number;
-      maxPrice?: number;
-    }>({
+    searchProducts: builder.query<
+      Product[],
+      { search: string; category?: string; minPrice?: number; maxPrice?: number }
+    >({
       query: ({ search, category, minPrice, maxPrice }) => {
         const params = new URLSearchParams({ search });
         if (category) params.set("category", category);
@@ -66,7 +63,6 @@ export const api = createApi({
         return `/api/search?${params.toString()}`;
       },
       transformResponse: (raw: any): Product[] => {
-        // Handle both { products: [...] } and { results: [...] } shapes
         const list = raw?.products || raw?.results || raw?.data || raw;
         if (!Array.isArray(list)) return [];
         return list.map(normalizeProduct);
@@ -82,7 +78,6 @@ export const api = createApi({
         const list = raw?.wishlist || raw?.products || raw?.data || raw;
         if (!Array.isArray(list)) return [];
         return list.map((item: any) => {
-          // Wishlist items may have product nested inside
           const p = item.product || item;
           return normalizeProduct(p);
         });
@@ -93,25 +88,28 @@ export const api = createApi({
     // POST /api/users/:userId/wishlist { productId }
     addToWishlist: builder.mutation<void, { userId: string; productId: string }>({
       query: ({ userId, productId }) => ({
-        url:    `/api/users/${userId}/wishlist`,
+        url: `/api/users/${userId}/wishlist`,
         method: "POST",
-        body:   { productId },
+        body: { productId },
       }),
       invalidatesTags: ["Wishlist"],
     }),
 
     // DELETE /api/users/:userId/wishlist/:productId
-    removeFromWishlist: builder.mutation<void, { userId: string; productId: string }>({
+    removeFromWishlist: builder.mutation<
+      void,
+      { userId: string; productId: string }
+    >({
       query: ({ userId, productId }) => ({
-        url:    `/api/users/${userId}/wishlist/${productId}`,
+        url: `/api/users/${userId}/wishlist/${productId}`,
         method: "DELETE",
       }),
       invalidatesTags: ["Wishlist"],
     }),
 
-   /* ═══════════════════════════════════════════════════════
+    /* ═══════════════════════════════════════════════════════
        PROFILE
-    ═══════════════════════════════════════════════════════ */ 
+    ═══════════════════════════════════════════════════════ */
     // GET /api/users/:userId
     getProfile: builder.query<any, string>({
       query: (userId) => `/api/users/${userId}`,
@@ -122,23 +120,22 @@ export const api = createApi({
     // PUT /api/users/:userId
     updateProfile: builder.mutation<any, { userId: string; data: any }>({
       query: ({ userId, data }) => ({
-        url:    `/api/users/${userId}`,
+        url: `/api/users/${userId}`,
         method: "PUT",
-        body:   data,
+        body: data,
       }),
       invalidatesTags: ["Profile"],
     }),
 
     // PUT /api/users/:userId/password
-    changePassword: builder.mutation<any, {
-      userId:      string;
-      currentPassword: string;
-      newPassword: string;
-    }>({
+    changePassword: builder.mutation<
+      any,
+      { userId: string; currentPassword: string; newPassword: string }
+    >({
       query: ({ userId, currentPassword, newPassword }) => ({
-        url:    `/api/users/${userId}/password`,
+        url: `/api/users/${userId}/password`,
         method: "PUT",
-        body:   { currentPassword, newPassword },
+        body: { currentPassword, newPassword },
       }),
     }),
 
@@ -149,7 +146,8 @@ export const api = createApi({
       transformResponse: (raw: any) => raw?.orders || raw?.data || raw || [],
       providesTags: ["Orders"],
     }),
-      createOrder: builder.mutation<any, any>({
+
+    createOrder: builder.mutation<any, any>({
       query: (orderData) => ({
         url: "/api/orders",
         method: "POST",
@@ -157,73 +155,105 @@ export const api = createApi({
       }),
       invalidatesTags: ["Orders"],
     }),
-
   }),
-
 });
 
 // ─────────────────────────────────────────────────────────────
 // fixImageUrl & normalizeProduct
 // ─────────────────────────────────────────────────────────────
-function fixImageUrl(url: string | null | undefined): string | null {
-  if (!url || url.trim() === "") return null;
+
+function fixImageUrl(url: string | null | undefined): string {
+  if (!url || url.trim() === "") return "";
   if (url.includes("images.eternolux.com")) return url;
   return url;
 }
 
 function normalizeProduct(p: any): Product {
   const rawPrimary =
-    p.imageUrl  ?? p.image_url ?? p.image ?? p.thumbnail ??
-    (Array.isArray(p.images) && p.images.length > 0 ? p.images[0] : null);
+    p?.imageUrl ??
+    p?.image_url ??
+    p?.image ??
+    p?.thumbnail ??
+    (Array.isArray(p?.images) && p.images.length > 0 ? p.images[0] : null);
 
   const imageUrl = fixImageUrl(rawPrimary);
 
   const images: string[] = [];
   if (imageUrl) images.push(imageUrl);
-  if (Array.isArray(p.images)) {
+
+  if (Array.isArray(p?.images)) {
     for (const img of p.images) {
       const fixed = fixImageUrl(img);
       if (fixed && !images.includes(fixed)) images.push(fixed);
     }
   }
 
-  const dimensions = p.dimensions
-    ? typeof p.dimensions === "string" ? JSON.parse(p.dimensions) : p.dimensions
+  const dimensions = p?.dimensions
+    ? typeof p.dimensions === "string"
+      ? (() => {
+          try {
+            return JSON.parse(p.dimensions);
+          } catch {
+            return null;
+          }
+        })()
+      : p.dimensions
     : null;
 
-  const tags: string[] | null = Array.isArray(p.tags)
-    ? p.tags
-    : typeof p.tags === "string" ? JSON.parse(p.tags) : null;
+  const tags: string[] = Array.isArray(p?.tags)
+    ? p.tags.filter((t: any) => typeof t === "string")
+    : typeof p?.tags === "string"
+      ? (() => {
+          try {
+            const parsed = JSON.parse(p.tags);
+            if (Array.isArray(parsed)) {
+              return parsed.filter((t: any) => typeof t === "string");
+            }
+            if (typeof parsed === "string" && parsed.trim()) return [parsed.trim()];
+            return p.tags.trim() ? [p.tags.trim()] : [];
+          } catch {
+            return p.tags.trim() ? [p.tags.trim()] : [];
+          }
+        })()
+      : [];
 
   return {
-    productId:         p.productId    || p.product_id || p.id || "",
-    name:              p.name         || "Unnamed",
-    description:       p.description  ?? null,
-    sku:               p.sku          || "",
-    brand:             p.brand        ?? null,
-    category:          p.category     || "",
+    productId: p?.productId || p?.product_id || p?.id || "",
+    name: p?.name || "Unnamed",
+    description: typeof p?.description === "string" ? p.description : "",
+    sku: p?.sku || "",
+    brand: p?.brand ?? null,
+    category: p?.category || "",
     tags,
-    price:             Number(p.price         ?? 0),
-    originalPrice:     p.originalPrice  != null ? Number(p.originalPrice)  : null,
-    costPrice:         p.costPrice      != null ? Number(p.costPrice)      : null,
-    stock:             Number(p.stock         ?? 0),
-    lowStockThreshold: p.lowStockThreshold != null ? Number(p.lowStockThreshold) : null,
+
+    price: Number(p?.price ?? 0),
+    originalPrice: Number(p?.originalPrice ?? 0),
+    costPrice: Number(p?.costPrice ?? 0),
+    stock: Number(p?.stock ?? 0),
+    lowStockThreshold: Number(p?.lowStockThreshold ?? 0),
+
     imageUrl,
     images,
-    weight:            p.weight     != null ? Number(p.weight) : null,
+
+    weight: Number(p?.weight ?? 0),
     dimensions,
-    rating:            p.rating      != null ? Number(p.rating)      : null,
-    reviewCount:       p.reviewCount != null ? Number(p.reviewCount) : null,
-    sellerId:          p.sellerId    ?? null,
-    status:            p.status      || "active",
-    isFeatured:        Boolean(p.isFeatured),
-    slug:              p.slug            ?? null,
-    metaTitle:         p.metaTitle       ?? p.meta_title       ?? null,
-    metaDescription:   p.metaDescription ?? p.meta_description ?? null,
-    views:             p.views     != null ? Number(p.views)     : null,
-    purchases:         p.purchases != null ? Number(p.purchases) : null,
-    createdAt:         p.createdAt  || p.created_at || "",
-    updatedAt:         p.updatedAt  ?? p.updated_at ?? null,
+
+    rating: Number(p?.rating ?? 0),
+    reviewCount: Number(p?.reviewCount ?? 0),
+
+    sellerId: p?.sellerId ?? null,
+    status: p?.status || "active",
+    isFeatured: Boolean(p?.isFeatured),
+
+    slug: p?.slug ?? null,
+    metaTitle: p?.metaTitle ?? p?.meta_title ?? null,
+    metaDescription: p?.metaDescription ?? p?.meta_description ?? null,
+
+    views: Number(p?.views ?? 0),
+    purchases: Number(p?.purchases ?? 0),
+
+    createdAt: p?.createdAt || p?.created_at || "",
+    updatedAt: p?.updatedAt ?? p?.updated_at ?? null,
   };
 }
 

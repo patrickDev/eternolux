@@ -1,9 +1,8 @@
-// src/app/search/page.tsx
+// src/app/product/page.tsx - SHOP ALL PAGE WITH FILTERS
 "use client";
 
-import React, { useState, useMemo, Suspense } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
-import { Search, SlidersHorizontal, X } from "lucide-react";
+import React, { useState, useMemo } from "react";
+import { SlidersHorizontal, X } from "lucide-react";
 import { useGetProductsQuery } from "@/store/api";
 import ProductTile from "@/app/components/ProductTitle";
 import FilterSidebar from "@/app/components/FilterSidebar";
@@ -11,14 +10,9 @@ import SortDropdown from "@/app/components/SortDropdown";
 
 const FONT = '"Helvetica Neue", Helvetica, Arial, sans-serif';
 
-function SearchPageContent() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const query = searchParams.get("q") || "";
-  
+export default function ShopAllPage() {
   const { data: products = [], isLoading } = useGetProductsQuery();
   
-  const [searchInput, setSearchInput] = useState(query);
   const [showFilters, setShowFilters] = useState(false);
   const [sortBy, setSortBy] = useState("featured");
   
@@ -39,20 +33,9 @@ function SearchPageContent() {
     return Array.from(catSet).sort();
   }, [products]);
 
-  // Search + Filter + Sort logic
+  // Filter + Sort logic
   const filteredProducts = useMemo(() => {
-    let filtered = products;
-
-    // Search filter
-    if (query) {
-      const lowerQuery = query.toLowerCase();
-      filtered = filtered.filter(p =>
-        p.name.toLowerCase().includes(lowerQuery) ||
-        p.brand?.toLowerCase().includes(lowerQuery) ||
-        p.category?.toLowerCase().includes(lowerQuery) ||
-        p.description?.toLowerCase().includes(lowerQuery)
-      );
-    }
+    let filtered = [...products];
 
     // Price filter
     filtered = filtered.filter(p => 
@@ -95,13 +78,7 @@ function SearchPageContent() {
     });
 
     return sorted;
-  }, [products, query, priceRange, selectedBrands, selectedCategories, inStockOnly, sortBy]);
-
-  const handleSearch = () => {
-    if (searchInput.trim()) {
-      router.push(`/search?q=${encodeURIComponent(searchInput.trim())}`);
-    }
-  };
+  }, [products, priceRange, selectedBrands, selectedCategories, inStockOnly, sortBy]);
 
   const clearFilters = () => {
     setPriceRange([0, 500]);
@@ -130,65 +107,36 @@ function SearchPageContent() {
 
   return (
     <div className="min-h-screen bg-gray-50" style={{ fontFamily: FONT }}>
-      {/* Search Bar */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-40">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center gap-4">
-            <div className="flex-1 relative">
-              <input
-                type="text"
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && handleSearch()}
-                placeholder="Search products, brands, categories..."
-                className="w-full px-4 py-3 pl-12 pr-4 border border-gray-200 rounded-xl focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-200 text-sm transition-all"
-              />
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-            </div>
-            <button
-              onClick={handleSearch}
-              className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-sm uppercase tracking-widest transition-all"
-            >
-              Search
-            </button>
-          </div>
-        </div>
-      </div>
-
       <div className="container mx-auto px-6 py-8">
         {/* Header */}
         <div className="mb-6">
-          {query && (
-            <div className="mb-4">
-              <h1 className="text-3xl font-black text-gray-900 mb-2">
-                Search Results for "{query}"
-              </h1>
-              <p className="text-gray-600">
-                {filteredProducts.length} {filteredProducts.length === 1 ? "product" : "products"} found
-              </p>
-            </div>
-          )}
-
-          {!query && (
-            <h1 className="text-3xl font-black text-gray-900 mb-2">
-              All Products
-            </h1>
-          )}
+          <h1 className="text-4xl font-black text-gray-900 mb-2">
+            Shop All Products
+          </h1>
+          <p className="text-gray-600">
+            Discover our complete collection of luxury fragrances
+          </p>
 
           {/* Filter and Sort Bar */}
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-2 px-4 py-2 border-2 border-gray-200 hover:border-red-600 rounded-lg font-bold text-sm transition-all"
-            >
-              <SlidersHorizontal size={18} />
-              Filters
-              {activeFilterCount > 0 && (
-                <span className="px-2 py-0.5 bg-red-600 text-white text-xs rounded-full font-black">
-                  {activeFilterCount}
-                </span>
-              )}
-            </button>
+          <div className="flex items-center justify-between gap-4 flex-wrap mt-6">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className="flex items-center gap-2 px-4 py-2 border-2 border-gray-200 hover:border-red-600 rounded-lg font-bold text-sm transition-all"
+              >
+                <SlidersHorizontal size={18} />
+                Filters
+                {activeFilterCount > 0 && (
+                  <span className="px-2 py-0.5 bg-red-600 text-white text-xs rounded-full font-black">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </button>
+
+              <span className="text-sm text-gray-600">
+                {filteredProducts.length} {filteredProducts.length === 1 ? "product" : "products"}
+              </span>
+            </div>
 
             <div className="flex items-center gap-3">
               {activeFilterCount > 0 && (
@@ -228,25 +176,18 @@ function SearchPageContent() {
           <div className="flex-1">
             {filteredProducts.length === 0 ? (
               <div className="text-center py-16">
-                <Search size={64} className="mx-auto text-gray-300 mb-4" />
                 <h3 className="text-2xl font-black text-gray-900 mb-2">
                   No products found
                 </h3>
                 <p className="text-gray-600 mb-6">
-                  {query ? `Try adjusting your search or filters` : `No products available`}
+                  Try adjusting your filters
                 </p>
-                {(query || activeFilterCount > 0) && (
-                  <button
-                    onClick={() => {
-                      setSearchInput("");
-                      router.push("/search");
-                      clearFilters();
-                    }}
-                    className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-full font-bold text-sm uppercase tracking-widest transition-all"
-                  >
-                    Clear Search & Filters
-                  </button>
-                )}
+                <button
+                  onClick={clearFilters}
+                  className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-full font-bold text-sm uppercase tracking-widest transition-all"
+                >
+                  Clear Filters
+                </button>
               </div>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
@@ -259,13 +200,5 @@ function SearchPageContent() {
         </div>
       </div>
     </div>
-  );
-}
-
-export default function SearchPage() {
-  return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="w-16 h-16 border-4 border-red-600 border-t-transparent rounded-full animate-spin" /></div>}>
-      <SearchPageContent />
-    </Suspense>
   );
 }
